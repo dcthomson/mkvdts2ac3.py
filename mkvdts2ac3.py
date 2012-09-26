@@ -21,27 +21,13 @@ import subprocess
 import time
 import glob
 
+destinationdirectory = ""
+
 starttime = time.time()
 
 fileordir  = sys.argv[1]
-#~ nzbname   = sys.argv[2]
-#~ cleanname = sys.argv[3]
-#~ reportnum = int(sys.argv[4])
-#~ category  = sys.argv[5]
-#~ group     = sys.argv[6]
-#~ status    = int(sys.argv[7])
 
-# SABnzbd argv: 
-# 1  The final directory of the job (full path) 
-# 2  The original name of the NZB file 
-# 3  Clean version of the job name (no path info and ".nzb" removed) 
-# 4  Indexer's report number (if supported) 
-# 5  User-defined category 
-# 6  Group that the NZB was posted in e.g. alt.binaries.x 
-# 7  Status of post processing. 0 = OK, 1=failed verification, 2=failed unpack, 3=1+2
-
-newdir = "C:\Users\Thomson\Downloads\sab\complete\movies"
-newdir = os.path.join(newdir, os.path.basename(os.path.normpath(fileordir)))
+newdir = os.path.join(destinationdirectory, os.path.basename(os.path.normpath(fileordir)))
 
 #~ set up temp dir
 from os.path import expanduser
@@ -59,6 +45,7 @@ if os.path.isdir(fileordir):
     mkvsize=0
     for fname in dirList:
         if fname.endswith('.mkv'):
+            # let's check sizes in case there is a sample vid in there
             fnamesize = os.path.getsize(os.path.join(fileordir, fname))
             if fnamesize > mkvsize:
                 mkvsize = fnamesize
