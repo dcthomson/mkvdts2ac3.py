@@ -27,6 +27,8 @@ starttime = time.time()
 
 fileordir  = sys.argv[1]
 
+if destinationdirectory == "":
+    destinationdirectory = fileordir
 newdir = os.path.join(destinationdirectory, os.path.basename(os.path.normpath(fileordir)))
 
 #~ set up temp dir
@@ -147,10 +149,11 @@ else:
             seconds = int(elapsed) % 60
             print "Total Time: " + str(minutes) + " minutes " + str(seconds) + " seconds"
 
-#~ move all files in original dir to the dir couch potato looks for
-if os.path.isdir(fileordir):
-    if not os.path.exists(newdir):
-        os.makedirs(newdir)
-    for filename in os.listdir(fileordir):
-        os.rename(os.path.join(fileordir, filename), os.path.join(newdir, filename))
-    os.rmdir(fileordir)
+if destinationdirectory != fileordir:
+    #~ move all files in original dir to the dir couch potato looks for
+    if os.path.isdir(fileordir):
+        if not os.path.exists(newdir):
+            os.makedirs(newdir)
+        for filename in os.listdir(fileordir):
+            os.rename(os.path.join(fileordir, filename), os.path.join(newdir, filename))
+        os.rmdir(fileordir)
