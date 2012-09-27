@@ -27,9 +27,12 @@ starttime = time.time()
 
 fileordir  = sys.argv[1]
 
+newdir = ""
+
 if destinationdirectory == "":
-    destinationdirectory = fileordir
-newdir = os.path.join(destinationdirectory, os.path.basename(os.path.normpath(fileordir)))
+    newdir = fileordir
+else:
+    newdir = destinationdirectory
 
 #~ set up temp dir
 from os.path import expanduser
@@ -149,7 +152,7 @@ else:
             seconds = int(elapsed) % 60
             print "Total Time: " + str(minutes) + " minutes " + str(seconds) + " seconds"
 
-if destinationdirectory != fileordir:
+if newdir != fileordir:
     #~ move all files in original dir to the dir couch potato looks for
     if os.path.isdir(fileordir):
         if not os.path.exists(newdir):
