@@ -32,7 +32,8 @@ newdir = ""
 if destinationdirectory == "":
     newdir = fileordir
 else:
-    newdir = destinationdirectory
+    videodir = os.path.basename(os.path.normpath(fileordir))
+    newdir = os.path.join(destinationdirectory, videodir)
 
 #~ set up temp dir
 from os.path import expanduser
