@@ -49,13 +49,10 @@ mkvfiles = []
 if os.path.isdir(fileordir):
     dirList=os.listdir(fileordir)
     mkvsize=0
+    mkvname = False
     for fname in dirList:
         if fname.endswith('.mkv'):
-            # let's check sizes in case there is a sample vid in there
-            fnamesize = os.path.getsize(os.path.join(fileordir, fname))
-            if fnamesize > mkvsize:
-                mkvsize = fnamesize
-                mkvfiles.append(fname)
+            mkvfiles.append(fname)
 else:
     for f in glob.glob(fileordir):
         if not os.path.isdir(f):
@@ -104,6 +101,7 @@ else:
             print "Extracting Timecodes..."
             subprocess.call(["mkvextract", "timecodes_v2", mkvfile, dtstrackid + ':' + tcfile])
         
+            # get the delay if there is any
             delay = False
             fp = open(tcfile)
             for i, line in enumerate(fp):
