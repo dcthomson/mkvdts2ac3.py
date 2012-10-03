@@ -50,14 +50,51 @@ and change it to something like:
 
 destinationdirectory = "C:\hooray\movietime"
 
+Here is the command line usage:
+
+usage: mkvdts2ac3.py [-h] [-c TITLE] [-d] [-e] [-f] [-i] [-k] [-n] [--new]
+                     [-r] [-s MODE] [-t TRACKID] [-w FOLDER] [-v] [-V]
+                     [--test] [--debug]
+                     ForD [ForD ...]
+
+convert matroska (.mkv) video files audio portion from dts to ac3
+
+positional arguments:
+  ForD                  a file or directory (wildcards may be used)
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -c TITLE, --custom TITLE
+                        Custom AC3 track title
+  -d, --default         Mark AC3 track as default
+  -e, --external        Leave AC3 track out of file. Does not modify the
+                        original matroska file. This overrides '-n' and '-d'
+                        arguments
+  -f, --force           Force processing when AC3 track is detected
+  -i, --initial         New AC3 track will be first in the file
+  -k, --keepdts         Keep external DTS track (implies '-n')
+  -n, --nodts           Do not retain the DTS track
+  --new                 Do not copy over original. Create new adjacent file
+  -r, --recursive       Recursively descend into directories
+  -s MODE, --compress MODE
+                        Apply header compression to streams (See mkvmerge's
+                        --compression)
+  -t TRACKID, --track TRACKID
+                        Specify alternate DTS track
+  -w FOLDER, --wd FOLDER
+                        Specify alternate temporary working directory
+  -v, --verbose         Turn on verbose output
+  -V, --version         Print script version information
+  --test                Print commands only, execute nothing
+  --debug               Print commands and pause before executing each
+
 
 Developed By
 ============
 * Drew Thomson - <drewthomson@outlook.com>
-* Chris Hoekstra - <chris.hoekstra@gmail.com>
 
 Git repository located at
-[github.com/JakeWharton/mkvdts2ac3](http://github.com/JakeWharton/mkvdts2ac3)
+[github.com/skooby/mkvdts2ac3](http://github.com/skooby/mkvdts2ac3)
 
 
 Very Special Thanks
