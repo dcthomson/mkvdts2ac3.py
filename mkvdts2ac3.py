@@ -24,6 +24,8 @@ import re
 import tempfile
 import sys
 
+version = "1.0"
+
 destinationdirectory = "C:\Users\Thomson\Downloads\sab\complete\movies"
 
 parser = argparse.ArgumentParser(description='convert matroska (.mkv) video files audio portion from dts to ac3')
@@ -31,6 +33,7 @@ parser.add_argument('fileordir', metavar='ForD', nargs='+', help='a file or dire
 
 parser.add_argument("-c", "--custom", metavar="TITLE", help="Custom AC3 track title")
 parser.add_argument("-d", "--default", help="Mark AC3 track as default", action="store_true")
+parser.add_argument("--destdir", metavar="DIRECTORY", help="Destination Directory")
 parser.add_argument("-e", "--external", action="store_true",
                     help="Leave AC3 track out of file. Does not modify the original matroska file. This overrides '-n' and '-d' arguments")
 parser.add_argument("-f", "--force", help="Force processing when AC3 track is detected", action="store_true")
@@ -40,10 +43,10 @@ parser.add_argument("-n", "--nodts", help="Do not retain the DTS track", action=
 parser.add_argument("--new", help="Do not copy over original. Create new adjacent file", action="store_true")
 parser.add_argument("-r", "--recursive", help="Recursively descend into directories", action="store_true")
 parser.add_argument("-s", "--compress", metavar="MODE", help="Apply header compression to streams (See mkvmerge's --compression)")
-parser.add_argument("-t", "--track", metavar="TRACKID", help="Specify alternate DTS track")
+parser.add_argument("-t", "--track", metavar="TRACKID", help="Specify alternate DTS track. If it is not a DTS track it will default to the first DTS track found")
 parser.add_argument("-w", "--wd", metavar="FOLDER", help="Specify alternate temporary working directory")
-parser.add_argument("-v", "--verbose", help="Turn on verbose output", action="store_true")
-parser.add_argument("-V", "--version", help="Print script version information", action="store_true")
+parser.add_argument("-v", "--verbose", help="Turn on verbose output", action="count", default=0)
+parser.add_argument("-V", "--version", help="Print script version information", action='version', version='%(prog)s ' + version + ' by Drew Thomson')
 parser.add_argument("--test", help="Print commands only, execute nothing", action="store_true")
 parser.add_argument("--debug", help="Print commands and pause before executing each", action="store_true")
 
@@ -52,6 +55,20 @@ args = parser.parse_args()
 def doprint(mystr):
     if args.test or args.debug or args.verbose:
         sys.stdout.write(mystr)
+    
+def runcommand(cmdlist):
+    if args.test or args.debug or args.verbose >= 1:
+        cmdstr = ''
+        for e in cmdlist:
+            cmdstr += e + ' '
+        print "\n" + cmdstr.rstrip()
+    if args.debug:
+        raw_input("Press Enter to continue...")
+    if not args.test:
+        if args.verbose >= 2:
+            subprocess.call(cmdlist)
+        else:
+            subprocess.call(cmdlist, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
 def process(ford):
     if os.path.isdir(ford):
@@ -80,7 +97,7 @@ def process(ford):
 #                tempdir = os.path.join(tempdir, 'mkvdts2ac3')
 #            if not os.path.exists(tempdir):
 #                os.makedirs(tempdir)
-            fileName = os.path.split(ford)[1]
+            (dirName, fileName) = os.path.split(ford)
             fileBaseName = os.path.splitext(fileName)[0]
             
             doprint("filename: " + fileName + "\n")
@@ -89,6 +106,7 @@ def process(ford):
             ac3file = os.path.join(tempdir, fileBaseName + '.ac3')
             tcfile = os.path.join(tempdir, fileBaseName + '.tc')
             newmkvfile = os.path.join(tempdir, fileBaseName + '.mkv')
+            adjacentmkvfile = os.path.join(dirName, fileBaseName + '.new.mkv')
             
             # get dts track id and video track id
             output = subprocess.check_output(["mkvmerge", "-i", ford])
@@ -165,26 +183,28 @@ def process(ford):
                 # extract timecodes
                 tctime = time.time()
                 doprint("  Extracting Timecodes...")
-                subprocess.call(["mkvextract", "timecodes_v2", ford, dtstrackid + ':' + tcfile], stdout=subprocess.PIPE)
+                tccmd = ["mkvextract", "timecodes_v2", ford, dtstrackid + ":" + tcfile]
+                runcommand(tccmd)
                 elapsed = (time.time() - tctime)
                 minutes = int(elapsed / 60)
                 seconds = int(elapsed) % 60
                 doprint(str(minutes) + "min " + str(seconds) + " sec\n")
                 
-                
-                # get the delay if there is any
                 delay = False
-                fp = open(tcfile)
-                for i, line in enumerate(fp):
-                    if i == 1:
-                        delay = line
-                        break
-                fp.close()
+                if not args.test:
+                    # get the delay if there is any
+                    fp = open(tcfile)
+                    for i, line in enumerate(fp):
+                        if i == 1:
+                            delay = line
+                            break
+                    fp.close()
                 
                 # extract dts track
                 extracttime = time.time()
                 doprint("  Extracting DTS track...")
-                subprocess.call(["mkvextract", "tracks", ford, dtstrackid + ':' + dtsfile], stdout=subprocess.PIPE)
+                extractcmd = ["mkvextract", "tracks", ford, dtstrackid + ':' + dtsfile]
+                runcommand(extractcmd)
                 elapsed = (time.time() - extracttime)
                 minutes = int(elapsed / 60)
                 seconds = int(elapsed) % 60
@@ -193,92 +213,100 @@ def process(ford):
                 # convert DTS to AC3
                 converttime = time.time()
                 doprint("  Converting DTS to AC3...")
-                subprocess.call(["ffmpeg", "-y", "-i", dtsfile, "-acodec", "ac3", "-ac", "6", "-ab", "448k", ac3file], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                convertcmd = ["ffmpeg", "-y", "-i", dtsfile, "-acodec", "ac3", "-ac", "6", "-ab", "448k", ac3file]
+                runcommand(convertcmd)
                 elapsed = (time.time() - converttime)
                 minutes = int(elapsed / 60)
                 seconds = int(elapsed) % 60
-                doprint(str(minutes) + "min " + str(seconds) + " sec\n")                
-                
-                # remux
-                remuxtime = time.time()
-                doprint("  Remuxing AC3 into MKV...")
-                # Start to "build" command
-                remux = ["mkvmerge"]
-                
-                # Puts the AC3 track as the second in the file if indicated as initial
-                if args.initial:
-                    remux.append("--track-order 0:1,1:0")
+                doprint(str(minutes) + "min " + str(seconds) + " sec\n")
+                if args.external:
+                    if not args.test:
+                        os.rename(ac3file, os.path.join(dirName, fileBaseName + '.ac3'))
+                else:
+                    # remux
+                    remuxtime = time.time()
+                    doprint("  Remuxing AC3 into MKV...")
+                    # Start to "build" command
+                    remux = ["mkvmerge"]
                     
-                # Declare output file
-                remux.append("-o")
-                remux.append(newmkvfile)
-                
-                # If user doesn't want the original DTS track drop it
-                comp = "none"
-                if args.nodts or args.keepdts:
-                    if len(audiotracks) == 1:
-                        remux.append("-A")
-                    else:
-                        audiotracks = [audiotrack for audiotrack in audiotracks if audiotrack != dtstrackid]
-                        remux.append("-a")
-                        remux.append(",".join(audiotracks))
-                        comp = "none"
-                        if args.compress:
-                            comp = args.compress
-                        for tid in audiotracks:
-                            remux.append("--compression")
-                            remux.append(tid + ":" + comp)
-                
-                # Add original MKV file, set header compression scheme         
-                remux.append("--compression")
-                remux.append(videotrackid + ":" + comp)
-                remux.append(ford)
+                    # Puts the AC3 track as the second in the file if indicated as initial
+                    if args.initial:
+                        remux.append("--track-order")
+                        remux.append("0:1,1:0")
                         
-                # If user wants new AC3 as default then add appropriate arguments to command
-                if args.default:
-                    remux.append("--default-track")
-                    remux.append("0")
-                
-                # Set the language
-                remux.append("--language")
-                remux.append("0:" + dtslang)
-                
-                # If the name was set for the original DTS track set it for the AC3
-                remux.append("--track-name")
-                remux.append("0:\"" + dtsname.rstrip() + "\"")
-                
-                # set delay if there is any
-                if delay:
-                    remux.append("--sync")
-                    remux.append("0:" + delay.rstrip())
+                    # Declare output file
+                    remux.append("-o")
+                    remux.append(newmkvfile)
                     
-                # Set track compression scheme and append new AC3
-                remux.append("--compression")
-                remux.append("0:" + comp)
-                remux.append(ac3file)
-                
-                subprocess.call(remux, stdout=subprocess.PIPE)
-                elapsed = (time.time() - remuxtime)
-                minutes = int(elapsed / 60)
-                seconds = int(elapsed) % 60
-                doprint(str(minutes) + "min " + str(seconds) + " sec\n")  
-                
-#                s = ''
-#                for elem in remux:
-#                    s += elem + ' '
-#                doprint("\n")
-#                doprint("  " + s)
-#                doprint("\n")
+                    # If user doesn't want the original DTS track drop it
+                    comp = "none"
+                    if args.nodts or args.keepdts:
+                        if len(audiotracks) == 1:
+                            remux.append("-A")
+                        else:
+                            audiotracks = [audiotrack for audiotrack in audiotracks if audiotrack != dtstrackid]
+                            remux.append("-a")
+                            remux.append(",".join(audiotracks))
+                            if args.compress:
+                                comp = args.compress
+                            for tid in audiotracks:
+                                remux.append("--compression")
+                                remux.append(tid + ":" + comp)
+                    
+                    # Add original MKV file, set header compression scheme         
+                    remux.append("--compression")
+                    remux.append(videotrackid + ":" + comp)
+                    remux.append(ford)
+                            
+                    # If user wants new AC3 as default then add appropriate arguments to command
+                    if args.default:
+                        remux.append("--default-track")
+                        remux.append("0")
+                    
+                    # Set the language
+                    remux.append("--language")
+                    remux.append("0:" + dtslang)
+                    
+                    # If the name was set for the original DTS track set it for the AC3
+                    if dtsname:
+                        remux.append("--track-name")
+                        remux.append("0:\"" + dtsname.rstrip() + "\"")
+                    
+                    # set delay if there is any
+                    if delay:
+                        remux.append("--sync")
+                        remux.append("0:" + delay.rstrip())
+                        
+                    # Set track compression scheme and append new AC3
+                    remux.append("--compression")
+                    remux.append("0:" + comp)
+                    remux.append(ac3file)
+                    
+                    runcommand(remux)
+                    
+                    elapsed = (time.time() - remuxtime)
+                    minutes = int(elapsed / 60)
+                    seconds = int(elapsed) % 60
+                    doprint(str(minutes) + "min " + str(seconds) + " sec\n")  
 
-                #~ replace old mkv with new mkv
-                os.remove(ford)
-                os.rename(newmkvfile, ford)
-    
-                #~ clean up temp folder
-                os.remove(dtsfile)
-                os.remove(ac3file)
-                os.remove(tcfile)
-                os.rmdir(tempdir)
+                    if not args.test:
+                        #~ replace old mkv with new mkv
+                        if args.new:
+                            os.rename(newmkvfile, adjacentmkvfile)
+                        else:
+                            os.remove(ford)
+                            os.rename(newmkvfile, ford)
+
+                if not args.test:
+                    #~ clean up temp folder
+                    if args.keepdts and not args.external:
+                        os.rename(dtsfile, os.path.join(dirName, fileBaseName + ".dts"))
+                    else:
+                        os.remove(dtsfile)
+                    if not args.external:
+                        os.remove(ac3file)
+                    os.remove(tcfile)
+                    os.rmdir(tempdir)
 
                 #~ print out time taken
                 elapsed = (time.time() - starttime)
@@ -295,6 +323,7 @@ for a in args.fileordir:
                 process(os.path.join(ford, f))
         else:
             process(ford)
+
 totaltime = (time.time() - totalstime)
 minutes = int(totaltime / 60)
 seconds = int(totaltime) % 60

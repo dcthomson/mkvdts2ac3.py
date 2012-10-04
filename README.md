@@ -39,10 +39,10 @@ Usage
 =====
 
 This script was designed to be used in conjunction with sabnzbd. It will search
-a directory for the largest matroska file and check if it has a DTS track. If so,
+a directory for the matroska files and check if it has a DTS track. If so,
 it will convert the first DTS track it finds to AC3 and append it to the file.
-If you want the directory contents to be moved to new directory you can edit the
-variable at the beginning of the file which looks like:
+If you want the directory contents to be moved to a new directory you can edit
+the variable at the beginning of the file which looks like:
 
 destinationdirectory = ""
 
@@ -91,7 +91,7 @@ optional arguments:
 
 Developed By
 ============
-* Drew Thomson - <drewthomson@outlook.com>
+* Drew Thomson - <drewthomson at outlook dot com>
 
 Git repository located at
 [github.com/skooby/mkvdts2ac3](http://github.com/skooby/mkvdts2ac3)
