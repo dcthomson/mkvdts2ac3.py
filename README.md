@@ -51,7 +51,7 @@ and change it to something like:
 destinationdirectory = "C:\hooray\movietime"
 
 Here is the command line usage:
-
+<pre>
 usage: mkvdts2ac3.py [-h] [-c TITLE] [-d] [-e] [-f] [-i] [-k] [-n] [--new]
                      [-r] [-s MODE] [-t TRACKID] [-w FOLDER] [-v] [-V]
                      [--test] [--debug]
@@ -87,7 +87,7 @@ optional arguments:
   -V, --version         Print script version information
   --test                Print commands only, execute nothing
   --debug               Print commands and pause before executing each
-
+</pre>
 
 Developed By
 ============
