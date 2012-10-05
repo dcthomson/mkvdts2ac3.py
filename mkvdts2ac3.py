@@ -91,12 +91,7 @@ def process(ford):
             else:
                 tempdir = tempfile.gettempdir()
                 tempdir = os.path.join(tempdir, "mkvdts2ac3")
-#                from os.path import expanduser
-#                home = expanduser("~")
-#                tempdir = os.path.join(home, 'temp')
-#                tempdir = os.path.join(tempdir, 'mkvdts2ac3')
-#            if not os.path.exists(tempdir):
-#                os.makedirs(tempdir)
+                
             (dirName, fileName) = os.path.split(ford)
             fileBaseName = os.path.splitext(fileName)[0]
             
@@ -111,6 +106,7 @@ def process(ford):
             newmkvfile = fileBaseName + '.mkv'
             tempnewmkvfile = os.path.join(tempdir, newmkvfile)
             adjacentmkvfile = os.path.join(dirName, fileBaseName + '.new.mkv')
+            fname = fileName
             
             # get dts track id and video track id
             output = subprocess.check_output(["mkvmerge", "-i", ford])
