@@ -52,9 +52,9 @@ destinationdirectory = "C:\hooray\movietime"
 
 Here is the command line usage:
 <pre>
-usage: mkvdts2ac3.py [-h] [-c TITLE] [-d] [-e] [-f] [-i] [-k] [-n] [--new]
-                     [-r] [-s MODE] [-t TRACKID] [-w FOLDER] [-v] [-V]
-                     [--test] [--debug]
+usage: mkvdts2ac3.py [-h] [-c TITLE] [-d] [--destdir DIRECTORY] [-e] [-f] [-i]
+                     [-k] [-n] [--new] [-r] [-s MODE] [-t TRACKID] [-w FOLDER]
+                     [-v] [-V] [--test] [--debug]
                      ForD [ForD ...]
 
 convert matroska (.mkv) video files audio portion from dts to ac3
@@ -67,6 +67,7 @@ optional arguments:
   -c TITLE, --custom TITLE
                         Custom AC3 track title
   -d, --default         Mark AC3 track as default
+  --destdir DIRECTORY   Destination Directory
   -e, --external        Leave AC3 track out of file. Does not modify the
                         original matroska file. This overrides '-n' and '-d'
                         arguments
@@ -80,7 +81,8 @@ optional arguments:
                         Apply header compression to streams (See mkvmerge's
                         --compression)
   -t TRACKID, --track TRACKID
-                        Specify alternate DTS track
+                        Specify alternate DTS track. If it is not a DTS track
+                        it will default to the first DTS track found
   -w FOLDER, --wd FOLDER
                         Specify alternate temporary working directory
   -v, --verbose         Turn on verbose output

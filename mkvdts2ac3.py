@@ -102,10 +102,14 @@ def process(ford):
             
             doprint("filename: " + fileName + "\n")
             
-            dtsfile = os.path.join(tempdir, fileBaseName + '.dts')
-            ac3file = os.path.join(tempdir, fileBaseName + '.ac3')
-            tcfile = os.path.join(tempdir, fileBaseName + '.tc')
-            newmkvfile = os.path.join(tempdir, fileBaseName + '.mkv')
+            dtsfile = fileBaseName + '.dts'
+            tempdtsfile = os.path.join(tempdir, dtsfile)
+            ac3file = fileBaseName + '.ac3'
+            tempac3file = os.path.join(tempdir, ac3file)
+            tcfile = fileBaseName + '.tc'
+            temptcfile = os.path.join(tempdir, tcfile)
+            newmkvfile = fileBaseName + '.mkv'
+            tempnewmkvfile = os.path.join(tempdir, newmkvfile)
             adjacentmkvfile = os.path.join(dirName, fileBaseName + '.new.mkv')
             
             # get dts track id and video track id
@@ -183,7 +187,7 @@ def process(ford):
                 # extract timecodes
                 tctime = time.time()
                 doprint("  Extracting Timecodes...")
-                tccmd = ["mkvextract", "timecodes_v2", ford, dtstrackid + ":" + tcfile]
+                tccmd = ["mkvextract", "timecodes_v2", ford, dtstrackid + ":" + temptcfile]
                 runcommand(tccmd)
                 elapsed = (time.time() - tctime)
                 minutes = int(elapsed / 60)
@@ -193,7 +197,7 @@ def process(ford):
                 delay = False
                 if not args.test:
                     # get the delay if there is any
-                    fp = open(tcfile)
+                    fp = open(temptcfile)
                     for i, line in enumerate(fp):
                         if i == 1:
                             delay = line
@@ -222,6 +226,7 @@ def process(ford):
                 if args.external:
                     if not args.test:
                         os.rename(ac3file, os.path.join(dirName, fileBaseName + '.ac3'))
+                        fname = ac3file
                 else:
                     # remux
                     remuxtime = time.time()
@@ -236,7 +241,7 @@ def process(ford):
                         
                     # Declare output file
                     remux.append("-o")
-                    remux.append(newmkvfile)
+                    remux.append(tempnewmkvfile)
                     
                     # If user doesn't want the original DTS track drop it
                     comp = "none"
@@ -292,20 +297,21 @@ def process(ford):
                     if not args.test:
                         #~ replace old mkv with new mkv
                         if args.new:
-                            os.rename(newmkvfile, adjacentmkvfile)
+                            os.rename(tempnewmkvfile, adjacentmkvfile)
                         else:
                             os.remove(ford)
-                            os.rename(newmkvfile, ford)
+                            os.rename(tempnewmkvfile, ford)
 
                 if not args.test:
                     #~ clean up temp folder
                     if args.keepdts and not args.external:
                         os.rename(dtsfile, os.path.join(dirName, fileBaseName + ".dts"))
+                        fname = dtsfile
                     else:
-                        os.remove(dtsfile)
+                        os.remove(tempdtsfile)
                     if not args.external:
-                        os.remove(ac3file)
-                    os.remove(tcfile)
+                        os.remove(tempac3file)
+                    os.remove(temptcfile)
                     os.rmdir(tempdir)
 
                 #~ print out time taken
@@ -314,16 +320,25 @@ def process(ford):
                 seconds = int(elapsed) % 60
                 doprint("  " + fileName + " finished in: " + str(minutes) + " minutes " + str(seconds) + " seconds\n")
 
+                return fname
 
 totalstime = time.time()
 for a in args.fileordir:
     for ford in glob.glob(a):
+        fname = False
         if os.path.isdir(ford):
             for f in os.listdir(ford):
                 process(os.path.join(ford, f))
         else:
-            process(ford)
-
+            fname = process(ford)
+        if args.destdir:
+            
+            if fname:
+                (dirName, fileName) = os.path.split(ford)
+                os.rename(os.path.join(dirName, fname), os.path.join(args.destdir, fname))
+            else:
+                os.rename(ford, os.path.join(args.destdir, os.path.basename(os.path.normpath())))
+            
 totaltime = (time.time() - totalstime)
 minutes = int(totaltime / 60)
 seconds = int(totaltime) % 60
