@@ -28,9 +28,19 @@ import shutil
 
 version = "1.0"
 
-destinationdirectory = ""
-
 parser = argparse.ArgumentParser(description='convert matroska (.mkv) video files audio portion from dts to ac3')
+
+config = ConfigParser.SafeConfigParser()
+configFilename = os.path.join(os.path.dirname(sys.argv[0]), "mkvdts2ac3.cfg")
+
+if not os.path.isfile(configFilename):
+    print "ERROR: You need a mkvdts2ac3.cfg file - did you rename and edit the .sample?"
+    sys.exit(-1)
+
+config.read(configFilename)
+defaults = dict(config.items("mkvdts2ac3"))
+
+parser.set_defaults(**defaults)
 parser.add_argument('fileordir', metavar='ForD', nargs='+', help='a file or directory (wildcards may be used)')
 
 parser.add_argument("-c", "--custom", metavar="TITLE", help="Custom AC3 track title")
@@ -53,9 +63,6 @@ parser.add_argument("--test", help="Print commands only, execute nothing", actio
 parser.add_argument("--debug", help="Print commands and pause before executing each", action="store_true")
 
 args = parser.parse_args()
-
-if not args.destdir and destinationdirectory != "":
-    args.destdir = destinationdirectory
 
 def doprint(mystr):
     if args.test or args.debug or args.verbose:
@@ -337,6 +344,8 @@ for a in args.fileordir:
                 (dirName, fileName) = os.path.split(ford)
                 os.rename(os.path.join(dirName, fname), os.path.join(args.destdir, fname))
             else:
+#                print "from: " + os.path.abspath(ford)
+#                print "to:   " + os.path.join(args.destdir, os.path.basename(os.path.normpath(ford)))
                 shutil.move(os.path.abspath(ford), os.path.join(args.destdir, os.path.basename(os.path.normpath(ford))))
             
 totaltime = (time.time() - totalstime)
