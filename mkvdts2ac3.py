@@ -23,10 +23,12 @@ import glob
 import re
 import tempfile
 import sys
+import ConfigParser
+import shutil
 
 version = "1.0"
 
-destinationdirectory = "C:\Users\Thomson\Downloads\sab\complete\movies"
+destinationdirectory = ""
 
 parser = argparse.ArgumentParser(description='convert matroska (.mkv) video files audio portion from dts to ac3')
 parser.add_argument('fileordir', metavar='ForD', nargs='+', help='a file or directory (wildcards may be used)')
@@ -51,6 +53,9 @@ parser.add_argument("--test", help="Print commands only, execute nothing", actio
 parser.add_argument("--debug", help="Print commands and pause before executing each", action="store_true")
 
 args = parser.parse_args()
+
+if not args.destdir and destinationdirectory != "":
+    args.destdir = destinationdirectory
 
 def doprint(mystr):
     if args.test or args.debug or args.verbose:
@@ -203,7 +208,7 @@ def process(ford):
                 # extract dts track
                 extracttime = time.time()
                 doprint("  Extracting DTS track...")
-                extractcmd = ["mkvextract", "tracks", ford, dtstrackid + ':' + dtsfile]
+                extractcmd = ["mkvextract", "tracks", ford, dtstrackid + ':' + tempdtsfile]
                 runcommand(extractcmd)
                 elapsed = (time.time() - extracttime)
                 minutes = int(elapsed / 60)
@@ -213,7 +218,7 @@ def process(ford):
                 # convert DTS to AC3
                 converttime = time.time()
                 doprint("  Converting DTS to AC3...")
-                convertcmd = ["ffmpeg", "-y", "-i", dtsfile, "-acodec", "ac3", "-ac", "6", "-ab", "448k", ac3file]
+                convertcmd = ["ffmpeg", "-y", "-i", tempdtsfile, "-acodec", "ac3", "-ac", "6", "-ab", "448k", tempac3file]
                 runcommand(convertcmd)
                 elapsed = (time.time() - converttime)
                 minutes = int(elapsed / 60)
@@ -281,7 +286,7 @@ def process(ford):
                     # Set track compression scheme and append new AC3
                     remux.append("--compression")
                     remux.append("0:" + comp)
-                    remux.append(ac3file)
+                    remux.append(tempac3file)
                     
                     runcommand(remux)
                     
@@ -301,7 +306,7 @@ def process(ford):
                 if not args.test:
                     #~ clean up temp folder
                     if args.keepdts and not args.external:
-                        os.rename(dtsfile, os.path.join(dirName, fileBaseName + ".dts"))
+                        os.rename(tempdtsfile, os.path.join(dirName, fileBaseName + ".dts"))
                         fname = dtsfile
                     else:
                         os.remove(tempdtsfile)
@@ -328,12 +333,11 @@ for a in args.fileordir:
         else:
             fname = process(ford)
         if args.destdir:
-            
             if fname:
                 (dirName, fileName) = os.path.split(ford)
                 os.rename(os.path.join(dirName, fname), os.path.join(args.destdir, fname))
             else:
-                os.rename(ford, os.path.join(args.destdir, os.path.basename(os.path.normpath())))
+                shutil.move(os.path.abspath(ford), os.path.join(args.destdir, os.path.basename(os.path.normpath(ford))))
             
 totaltime = (time.time() - totalstime)
 minutes = int(totaltime / 60)
