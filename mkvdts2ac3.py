@@ -365,4 +365,7 @@ for a in args.fileordir:
 totaltime = (time.time() - totalstime)
 minutes = int(totaltime / 60)
 seconds = int(totaltime) % 60
-doprint("Total Time: " + str(minutes) + " minutes " + str(seconds) + " seconds")
+if sab:
+    doprint("mkv dts -> ac3 conversion: " + str(minutes) + " minutes " + str(seconds) + " seconds")
+else:
+    doprint("Total Time: " + str(minutes) + " minutes " + str(seconds) + " seconds")
