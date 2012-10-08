@@ -40,8 +40,8 @@ Usage
 
 <pre>
 usage: mkvdts2ac3.py [-h] [-c TITLE] [-d] [--destdir DIRECTORY] [-e] [-f] [-i]
-                     [-k] [-n] [--new] [-r] [-s MODE] [-t TRACKID] [-w FOLDER]
-                     [-v] [-V] [--test] [--debug]
+                     [-k] [--moveonlyifsab] [-n] [--new] [-r] [-s MODE]
+                     [-t TRACKID] [-w FOLDER] [-v] [-V] [--test] [--debug]
                      ForD [ForD ...]
 
 convert matroska (.mkv) video files audio portion from dts to ac3
@@ -61,6 +61,8 @@ optional arguments:
   -f, --force           Force processing when AC3 track is detected
   -i, --initial         New AC3 track will be first in the file
   -k, --keepdts         Keep external DTS track (implies '-n')
+  --moveonlyifsab       Only move to destination directory --destdir if called
+                        from sabnzbd
   -n, --nodts           Do not retain the DTS track
   --new                 Do not copy over original. Create new adjacent file
   -r, --recursive       Recursively descend into directories
