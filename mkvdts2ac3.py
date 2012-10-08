@@ -366,6 +366,6 @@ totaltime = (time.time() - totalstime)
 minutes = int(totaltime / 60)
 seconds = int(totaltime) % 60
 if sab:
-    doprint("mkv dts -> ac3 conversion: " + str(minutes) + " minutes " + str(seconds) + " seconds")
+    sys.stdout.write("mkv dts -> ac3 conversion: " + str(minutes) + " minutes " + str(seconds) + " seconds")
 else:
     doprint("Total Time: " + str(minutes) + " minutes " + str(seconds) + " seconds")
