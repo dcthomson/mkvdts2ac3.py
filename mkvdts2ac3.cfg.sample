@@ -1,0 +1,29 @@
+[mkvdts2ac3]
+
+# These options take an argument.
+# To enable you must remove the # at the beginning of the line and supply the
+# argument. 
+ 
+#destdir =
+#custom =
+#compress =
+#track =
+#wd =
+#verbose =
+
+
+# These options don't take any arguments, they are only true or false
+# false is the default
+# remove the # at the beginning of the line to enable the option
+
+#moveonlyifsab = True
+#default = True
+#external = True
+#force = True
+#initial = True
+#keepdts = True
+#nodts = True
+#new = True
+#recursive = True
+#test = True
+#debug = True

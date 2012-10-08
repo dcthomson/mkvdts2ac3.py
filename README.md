@@ -38,19 +38,6 @@ append the script's directory to the PATH variable.
 Usage
 =====
 
-This script was designed to be used in conjunction with sabnzbd. It will search
-a directory for the matroska files and check if it has a DTS track. If so,
-it will convert the first DTS track it finds to AC3 and append it to the file.
-If you want the directory contents to be moved to a new directory you can edit
-the variable at the beginning of the file which looks like:
-
-destinationdirectory = ""
-
-and change it to something like:
-
-destinationdirectory = "C:\hooray\movietime"
-
-Here is the command line usage:
 <pre>
 usage: mkvdts2ac3.py [-h] [-c TITLE] [-d] [--destdir DIRECTORY] [-e] [-f] [-i]
                      [-k] [-n] [--new] [-r] [-s MODE] [-t TRACKID] [-w FOLDER]
@@ -91,6 +78,7 @@ optional arguments:
   --debug               Print commands and pause before executing each
 </pre>
 
+  
 Developed By
 ============
 * Drew Thomson - <drewthomson at outlook dot com>
