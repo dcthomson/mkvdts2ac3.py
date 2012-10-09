@@ -22,12 +22,12 @@ Make sure the executables for the following libraries are accessible.
 Installation
 ------------
 If you have `git` installed, you can just run
-`git clone git://github.com/skooby/mkvdts2ac3.py.git`.
+`git clone git://github.com/dcthomson/mkvdts2ac3.py.git`.
 
 You can download the script directly with wget or curl:
-  wget https://raw.github.com/skooby/mkvdts2ac3.py/master/mkvdts2ac3.py
+  wget https://raw.github.com/dcthomson/mkvdts2ac3.py/master/mkvdts2ac3.py
   -or-
-  curl -O https://raw.github.com/skooby/mkvdts2ac3.py/master/mkvdts2ac3.py
+  curl -O https://raw.github.com/dcthomson/mkvdts2ac3.py/master/mkvdts2ac3.py
 
 Otherwise you can click the "Download" link on the GitHub project page and
 download an archive and extract its contents.
@@ -87,7 +87,7 @@ Developed By
 * Drew Thomson - <drewthomson at outlook dot com>
 
 Git repository located at
-[github.com/skooby/mkvdts2ac3](http://github.com/skooby/mkvdts2ac3)
+[github.com/dcthomson/mkvdts2ac3](http://github.com/dcthomson/mkvdts2ac3)
 
 
 Very Special Thanks

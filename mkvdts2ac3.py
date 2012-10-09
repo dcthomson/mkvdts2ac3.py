@@ -97,6 +97,12 @@ def runcommand(cmdlist):
         else:
             subprocess.call(cmdlist, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
+def find_mount_point(path):
+    path = os.path.abspath(path)
+    while not os.path.ismount(path):
+        path = os.path.dirname(path)
+    return path
+
 def process(ford):
     if os.path.isdir(ford):
         if args.recursive:
