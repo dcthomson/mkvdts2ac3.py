@@ -25,6 +25,7 @@ import tempfile
 import sys
 import ConfigParser
 import shutil
+import hashlib
 
 version = "1.0"
 
@@ -102,6 +103,15 @@ def find_mount_point(path):
     while not os.path.ismount(path):
         path = os.path.dirname(path)
     return path
+
+def getmd5(self, f, block_size=2**12):
+    md5 = hashlib.md5()
+    while True:
+        data = f.read(block_size)
+        if not data:
+            break
+        md5.update(data)
+    return md5.hexdigest()
 
 def process(ford):
     if os.path.isdir(ford):
