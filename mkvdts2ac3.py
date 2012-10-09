@@ -49,8 +49,8 @@ if not os.path.isfile(configFilename):
 config.read(configFilename)
 defaults = dict(config.items("mkvdts2ac3"))
 for key in defaults:
-    if key == "version":
-        defaults[version] = int(defaults[version])
+    if key == "verbose":
+        defaults["verbose"] = int(defaults["verbose"])
 
 parser.set_defaults(**defaults)
 parser.add_argument('fileordir', metavar='ForD', nargs='+', help='a file or directory (wildcards may be used)')
