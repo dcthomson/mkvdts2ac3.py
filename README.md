@@ -13,8 +13,9 @@ Prerequisites
 -------------
 Make sure the executables for the following libraries are accessible.
 
-1. [mkvtoolnix](http://www.bunkus.org/videotools/mkvtoolnix/) - Matroska tools
-2. [ffmpeg](http://ffmpeg.org/) - Audio conversion tool
+1. [python](http://www.python.org/) - Python
+2. [mkvtoolnix](http://www.bunkus.org/videotools/mkvtoolnix/) - Matroska tools
+3. [ffmpeg](http://ffmpeg.org/) - Audio conversion tool
 
 *Note: If you are a Mac OS X user you may need to compile these libraries.*
 
