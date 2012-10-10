@@ -4,9 +4,10 @@
 # To enable you must remove the # at the beginning of the line and supply the
 # argument. 
  
-#destdir =
+#sabdestdir =
 #custom =
 #compress =
+#destdir =
 #track =
 #wd =
 #verbose =
@@ -16,7 +17,6 @@
 # false is the default
 # remove the # at the beginning of the line to enable the option
 
-#moveonlyifsab = True
 #default = True
 #external = True
 #force = True

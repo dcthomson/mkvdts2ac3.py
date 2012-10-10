@@ -63,11 +63,11 @@ parser.add_argument("-e", "--external", action="store_true",
 parser.add_argument("-f", "--force", help="Force processing when AC3 track is detected", action="store_true")
 parser.add_argument("-i", "--initial", help="New AC3 track will be first in the file", action="store_true")
 parser.add_argument("-k", "--keepdts", help="Keep external DTS track (implies '-n')", action="store_true")
-parser.add_argument("--moveonlyifsab", help="Only move to destination directory --destdir if called from sabnzbd", action="store_true")
 parser.add_argument("-n", "--nodts", help="Do not retain the DTS track", action="store_true")
 parser.add_argument("--new", help="Do not copy over original. Create new adjacent file", action="store_true")
 parser.add_argument("-r", "--recursive", help="Recursively descend into directories", action="store_true")
 parser.add_argument("-s", "--compress", metavar="MODE", help="Apply header compression to streams (See mkvmerge's --compression)")
+parser.add_argument("--sabdestdir", metavar="DIRECTORY", help="SABnzbd Destination Directory")
 parser.add_argument("-t", "--track", metavar="TRACKID", help="Specify alternate DTS track. If it is not a DTS track it will default to the first DTS track found")
 parser.add_argument("-w", "--wd", metavar="FOLDER", help="Specify alternate temporary working directory")
 parser.add_argument("-v", "--verbose", help="Turn on verbose output", action="count")
@@ -372,12 +372,15 @@ for a in args.fileordir:
         else:
             fname = process(ford)
         if args.destdir:
-            if not args.moveonlyifsab or (args.moveonlyifsab and sab):
-                if fname:
-                    (dirName, fileName) = os.path.split(ford)
-                    os.rename(os.path.join(dirName, fname), os.path.join(args.destdir, fname))
-                else:
-                    shutil.move(os.path.abspath(ford), os.path.join(args.destdir, os.path.basename(os.path.normpath(ford))))
+            destdir = args.destdir
+        if sab and args.sabdestdir:
+            destdir = args.sabdestdir
+        if destdir:
+            if fname:
+                (dirName, fileName) = os.path.split(ford)
+                os.rename(os.path.join(dirName, fname), os.path.join(destdir, fname))
+            else:
+                shutil.move(os.path.abspath(ford), os.path.join(destdir, os.path.basename(os.path.normpath(ford))))
             
 totaltime = (time.time() - totalstime)
 minutes = int(totaltime / 60)
