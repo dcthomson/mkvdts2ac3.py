@@ -264,7 +264,7 @@ def process(ford):
                 doprint(str(minutes) + "min " + str(seconds) + " sec\n")
                 if args.external:
                     if not args.test:
-                        os.rename(ac3file, os.path.join(dirName, fileBaseName + '.ac3'))
+                        os.rename(tempac3file, os.path.join(dirName, fileBaseName + '.ac3'))
                         fname = ac3file
                 else:
                     # remux
@@ -276,7 +276,8 @@ def process(ford):
                     # Puts the AC3 track as the second in the file if indicated as initial
                     if args.initial:
                         remux.append("--track-order")
-                        remux.append("0:1,1:0")
+                        remux.append("1:0,0:1")
+
                         
                     # Declare output file
                     remux.append("-o")
