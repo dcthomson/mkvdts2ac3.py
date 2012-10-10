@@ -41,8 +41,9 @@ Usage
 
 <pre>
 usage: mkvdts2ac3.py [-h] [-c TITLE] [-d] [--destdir DIRECTORY] [-e] [-f] [-i]
-                     [-k] [--moveonlyifsab] [-n] [--new] [-r] [-s MODE]
-                     [-t TRACKID] [-w FOLDER] [-v] [-V] [--test] [--debug]
+                     [-k] [-n] [--new] [-o] [-r] [-s MODE]
+                     [--sabdestdir DIRECTORY] [-t TRACKID] [-w FOLDER] [-v]
+                     [-V] [--test] [--debug]
                      ForD [ForD ...]
 
 convert matroska (.mkv) video files audio portion from dts to ac3
@@ -62,14 +63,16 @@ optional arguments:
   -f, --force           Force processing when AC3 track is detected
   -i, --initial         New AC3 track will be first in the file
   -k, --keepdts         Keep external DTS track (implies '-n')
-  --moveonlyifsab       Only move to destination directory --destdir if called
-                        from sabnzbd
   -n, --nodts           Do not retain the DTS track
   --new                 Do not copy over original. Create new adjacent file
+  -o, --overwrite       Overwrite file if already there. This only applies if
+                        destdir or sabdestdir is set
   -r, --recursive       Recursively descend into directories
   -s MODE, --compress MODE
                         Apply header compression to streams (See mkvmerge's
                         --compression)
+  --sabdestdir DIRECTORY
+                        SABnzbd Destination Directory
   -t TRACKID, --track TRACKID
                         Specify alternate DTS track. If it is not a DTS track
                         it will default to the first DTS track found
