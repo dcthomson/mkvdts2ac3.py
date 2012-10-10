@@ -37,22 +37,22 @@ if len(sys.argv) == 8:
     if int(ppstatus) >= 0 and int(ppstatus) <= 3 and "." in nzbgroup:
         sab = True
 
+# create parser
 parser = argparse.ArgumentParser(description='convert matroska (.mkv) video files audio portion from dts to ac3')
 
-config = ConfigParser.SafeConfigParser()
+# set config file arguments
 configFilename = os.path.join(os.path.dirname(sys.argv[0]), "mkvdts2ac3.cfg")
 
-if not os.path.isfile(configFilename):
-    print "ERROR: You need a mkvdts2ac3.cfg file - did you rename and edit the .sample?"
-    sys.exit(-1)
+if os.path.isfile(configFilename):
+    config = ConfigParser.SafeConfigParser()
+    config.read(configFilename)
+    defaults = dict(config.items("mkvdts2ac3"))
+    for key in defaults:
+        if key == "verbose":
+            defaults["verbose"] = int(defaults["verbose"])
+    
+    parser.set_defaults(**defaults)
 
-config.read(configFilename)
-defaults = dict(config.items("mkvdts2ac3"))
-for key in defaults:
-    if key == "verbose":
-        defaults["verbose"] = int(defaults["verbose"])
-
-parser.set_defaults(**defaults)
 parser.add_argument('fileordir', metavar='ForD', nargs='+', help='a file or directory (wildcards may be used)')
 
 parser.add_argument("-c", "--custom", metavar="TITLE", help="Custom AC3 track title")
