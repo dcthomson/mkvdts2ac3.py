@@ -65,6 +65,7 @@ parser.add_argument("-i", "--initial", help="New AC3 track will be first in the 
 parser.add_argument("-k", "--keepdts", help="Keep external DTS track (implies '-n')", action="store_true")
 parser.add_argument("-n", "--nodts", help="Do not retain the DTS track", action="store_true")
 parser.add_argument("--new", help="Do not copy over original. Create new adjacent file", action="store_true")
+parser.add_argument("-o", "--overwrite", help="Overwrite file if already there. This only applies if destdir or sabdestdir is set", action="store_true")
 parser.add_argument("-r", "--recursive", help="Recursively descend into directories", action="store_true")
 parser.add_argument("-s", "--compress", metavar="MODE", help="Apply header compression to streams (See mkvmerge's --compression)")
 parser.add_argument("--sabdestdir", metavar="DIRECTORY", help="SABnzbd Destination Directory")
@@ -84,19 +85,27 @@ def doprint(mystr):
     if args.test or args.debug or args.verbose:
         sys.stdout.write(mystr)
     
-def runcommand(cmdlist):
+def runcommand(title, cmdlist):
+    cmdstarttime = time.time()
     if args.test or args.debug or args.verbose >= 1:
-        cmdstr = ''
-        for e in cmdlist:
-            cmdstr += e + ' '
-        print "\n" + cmdstr.rstrip()
+        sys.stdout.write(title)
+        if args.test or args.debug or args.verbose >= 2:
+            cmdstr = ''
+            for e in cmdlist:
+                cmdstr += e + ' '
+            print "\n" + cmdstr.rstrip()
     if args.debug:
         raw_input("Press Enter to continue...")
     if not args.test:
-        if args.verbose >= 2:
+        if args.verbose >= 3:
             subprocess.call(cmdlist)
         else:
             subprocess.call(cmdlist, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if args.test or args.debug or args.verbose >= 1:
+        elapsed = (time.time() - cmdstarttime)
+        minutes = int(elapsed / 60)
+        seconds = int(elapsed) % 60
+        print str(minutes) + "min " + str(seconds) + " sec"
 
 def find_mount_point(path):
     path = os.path.abspath(path)
@@ -224,14 +233,9 @@ def process(ford):
                             dtsname = dtsname.replace("dts", "ac3")
                 
                 # extract timecodes
-                tctime = time.time()
-                doprint("  Extracting Timecodes...")
+                tctitle = "  Extracting Timecodes..."
                 tccmd = ["mkvextract", "timecodes_v2", ford, dtstrackid + ":" + temptcfile]
-                runcommand(tccmd)
-                elapsed = (time.time() - tctime)
-                minutes = int(elapsed / 60)
-                seconds = int(elapsed) % 60
-                doprint(str(minutes) + "min " + str(seconds) + " sec\n")
+                runcommand(tctitle, tccmd)
                 
                 delay = False
                 if not args.test:
@@ -244,32 +248,22 @@ def process(ford):
                     fp.close()
                 
                 # extract dts track
-                extracttime = time.time()
-                doprint("  Extracting DTS track...")
+                extracttitle = "  Extracting DTS track..."
                 extractcmd = ["mkvextract", "tracks", ford, dtstrackid + ':' + tempdtsfile]
-                runcommand(extractcmd)
-                elapsed = (time.time() - extracttime)
-                minutes = int(elapsed / 60)
-                seconds = int(elapsed) % 60
-                doprint(str(minutes) + "min " + str(seconds) + " sec\n")
+                runcommand(extracttitle, extractcmd)
                 
                 # convert DTS to AC3
-                converttime = time.time()
-                doprint("  Converting DTS to AC3...")
+                converttitle = "  Converting DTS to AC3..."
                 convertcmd = ["ffmpeg", "-y", "-i", tempdtsfile, "-acodec", "ac3", "-ac", "6", "-ab", "448k", tempac3file]
-                runcommand(convertcmd)
-                elapsed = (time.time() - converttime)
-                minutes = int(elapsed / 60)
-                seconds = int(elapsed) % 60
-                doprint(str(minutes) + "min " + str(seconds) + " sec\n")
+                runcommand(converttitle, convertcmd)
+
                 if args.external:
                     if not args.test:
                         os.rename(tempac3file, os.path.join(dirName, fileBaseName + '.ac3'))
                         fname = ac3file
                 else:
                     # remux
-                    remuxtime = time.time()
-                    doprint("  Remuxing AC3 into MKV...")
+                    remuxtitle = "  Remuxing AC3 into MKV..."
                     # Start to "build" command
                     remux = ["mkvmerge"]
                     
@@ -327,12 +321,7 @@ def process(ford):
                     remux.append("0:" + comp)
                     remux.append(tempac3file)
                     
-                    runcommand(remux)
-                    
-                    elapsed = (time.time() - remuxtime)
-                    minutes = int(elapsed / 60)
-                    seconds = int(elapsed) % 60
-                    doprint(str(minutes) + "min " + str(seconds) + " sec\n")  
+                    runcommand(remuxtitle, remux)  
 
                     if not args.test:
                         #~ replace old mkv with new mkv
@@ -371,6 +360,7 @@ for a in args.fileordir:
                 process(os.path.join(ford, f))
         else:
             fname = process(ford)
+        destdir = False
         if args.destdir:
             destdir = args.destdir
         if sab and args.sabdestdir:
@@ -378,7 +368,15 @@ for a in args.fileordir:
         if destdir:
             if fname:
                 (dirName, fileName) = os.path.split(ford)
-                os.rename(os.path.join(dirName, fname), os.path.join(destdir, fname))
+                destfile = os.path.join(destdir, fname)
+                if os.path.exists(destfile):
+                    if args.overwrite:
+                        os.remove(destfile)
+                        os.rename(os.path.join(dirName, fname), destfile)
+                    else:
+                        print "File " + destfile + "already exists"
+                else:
+                    os.rename(os.path.join(dirName, fname), destfile)
             else:
                 shutil.move(os.path.abspath(ford), os.path.join(destdir, os.path.basename(os.path.normpath(ford))))
             
