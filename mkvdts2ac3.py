@@ -29,7 +29,7 @@ import hashlib
 
 version = "1.0"
 
-# check if from sabnzbdplus
+# check if called from sabnzbdplus
 sab = False
 if len(sys.argv) == 8:
     nzbgroup = sys.argv[6]
@@ -67,11 +67,11 @@ parser.add_argument("-n", "--nodts", help="Do not retain the DTS track", action=
 parser.add_argument("--new", help="Do not copy over original. Create new adjacent file", action="store_true")
 parser.add_argument("-o", "--overwrite", help="Overwrite file if already there. This only applies if destdir or sabdestdir is set", action="store_true")
 parser.add_argument("-r", "--recursive", help="Recursively descend into directories", action="store_true")
-parser.add_argument("-s", "--compress", metavar="MODE", help="Apply header compression to streams (See mkvmerge's --compression)")
+parser.add_argument("-s", "--compress", metavar="MODE", help="Apply header compression to streams (See mkvmerge's --compression)", default='none')
 parser.add_argument("--sabdestdir", metavar="DIRECTORY", help="SABnzbd Destination Directory")
 parser.add_argument("-t", "--track", metavar="TRACKID", help="Specify alternate DTS track. If it is not a DTS track it will default to the first DTS track found")
 parser.add_argument("-w", "--wd", metavar="FOLDER", help="Specify alternate temporary working directory")
-parser.add_argument("-v", "--verbose", help="Turn on verbose output", action="count")
+parser.add_argument("-v", "--verbose", help="Turn on verbose output", action="count", default=0)
 parser.add_argument("-V", "--version", help="Print script version information", action='version', version='%(prog)s ' + version + ' by Drew Thomson')
 parser.add_argument("--test", help="Print commands only, execute nothing", action="store_true")
 parser.add_argument("--debug", help="Print commands and pause before executing each", action="store_true")
@@ -183,7 +183,7 @@ def process(ford):
                     videotrackid = trackid
                 elif ': audio (A_AC3)' in line:
                     alreadygotac3 = True
-                elif args.track:
+                if args.track:
                     if "Track ID " + args.track + ": audio (A_DTS)" in line:
                         altdtstrackid = args.track
             if altdtstrackid:
@@ -278,7 +278,7 @@ def process(ford):
                     remux.append(tempnewmkvfile)
                     
                     # If user doesn't want the original DTS track drop it
-                    comp = "none"
+                    comp = args.compress
                     if args.nodts or args.keepdts:
                         if len(audiotracks) == 1:
                             remux.append("-A")
@@ -296,7 +296,9 @@ def process(ford):
                     remux.append("--compression")
                     remux.append(videotrackid + ":" + comp)
                     remux.append(ford)
-                            
+                    
+                    print "comp: " + comp
+                    
                     # If user wants new AC3 as default then add appropriate arguments to command
                     if args.default:
                         remux.append("--default-track")
@@ -379,7 +381,7 @@ for a in args.fileordir:
                     os.rename(os.path.join(dirName, fname), destfile)
             else:
                 shutil.move(os.path.abspath(ford), os.path.join(destdir, os.path.basename(os.path.normpath(ford))))
-            
+    
 totaltime = (time.time() - totalstime)
 minutes = int(totaltime / 60)
 seconds = int(totaltime) % 60
