@@ -71,13 +71,16 @@ parser.add_argument("-s", "--compress", metavar="MODE", help="Apply header compr
 parser.add_argument("--sabdestdir", metavar="DIRECTORY", help="SABnzbd Destination Directory")
 parser.add_argument("-t", "--track", metavar="TRACKID", help="Specify alternate DTS track. If it is not a DTS track it will default to the first DTS track found")
 parser.add_argument("-w", "--wd", metavar="FOLDER", help="Specify alternate temporary working directory")
-parser.add_argument("-v", "--verbose", help="Turn on verbose output", action="count", default=0)
+parser.add_argument("-v", "--verbose", help="Turn on verbose output. Use more v's for more verbosity. -v will output what it is doing. -vv will also output the command that it is running. -vvv will also output the command output", action="count", default=0)
 parser.add_argument("-V", "--version", help="Print script version information", action='version', version='%(prog)s ' + version + ' by Drew Thomson')
 parser.add_argument("--test", help="Print commands only, execute nothing", action="store_true")
 parser.add_argument("--debug", help="Print commands and pause before executing each", action="store_true")
 
 args = parser.parse_args()
 
+if args.verbose < 2 and (args.test or args.debug):
+    args.verbose = 2
+    
 if sab:
     args.fileordir = [args.fileordir[0]]
 
@@ -90,9 +93,9 @@ def doprint(mystr, v):
     
 def runcommand(title, cmdlist):
     cmdstarttime = time.time()
-    if args.debug or args.verbose >= 1:
+    if args.verbose >= 1:
         sys.stdout.write(title)
-        if args.test or args.debug or args.verbose >= 2:
+        if args.verbose >= 2:
             cmdstr = ''
             for e in cmdlist:
                 cmdstr += e + ' '
@@ -104,7 +107,7 @@ def runcommand(title, cmdlist):
             subprocess.call(cmdlist)
         else:
             subprocess.call(cmdlist, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if args.test or args.debug or args.verbose >= 1:
+    if args.verbose >= 1:
         elapsed = (time.time() - cmdstarttime)
         minutes = int(elapsed / 60)
         seconds = int(elapsed) % 60

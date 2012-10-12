@@ -78,7 +78,10 @@ optional arguments:
                         it will default to the first DTS track found
   -w FOLDER, --wd FOLDER
                         Specify alternate temporary working directory
-  -v, --verbose         Turn on verbose output
+  -v, --verbose         Turn on verbose output. Use more v's for more
+                        verbosity. -v will output what it is doing. -vv will
+                        also output the command that it is running. -vvv will
+                        also output the command output
   -V, --version         Print script version information
   --test                Print commands only, execute nothing
   --debug               Print commands and pause before executing each
