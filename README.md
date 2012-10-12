@@ -90,7 +90,7 @@ Developed By
 * Drew Thomson - <drewthomson at outlook dot com>
 
 Git repository located at
-[github.com/dcthomson/mkvdts2ac3](http://github.com/dcthomson/mkvdts2ac3)
+[github.com/dcthomson/mkvdts2ac3.py](http://github.com/dcthomson/mkvdts2ac3.py)
 
 
 Very Special Thanks
