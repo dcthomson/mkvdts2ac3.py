@@ -81,13 +81,16 @@ args = parser.parse_args()
 if sab:
     args.fileordir = [args.fileordir[0]]
 
-def doprint(mystr):
-    if args.test or args.debug or args.verbose:
+if args.debug and args.verbose == 0:
+    args.verbose = 1
+
+def doprint(mystr, v):
+    if v >= args.verbose:
         sys.stdout.write(mystr)
     
 def runcommand(title, cmdlist):
     cmdstarttime = time.time()
-    if args.test or args.debug or args.verbose >= 1:
+    if args.debug or args.verbose >= 1:
         sys.stdout.write(title)
         if args.test or args.debug or args.verbose >= 2:
             cmdstr = ''
@@ -147,7 +150,7 @@ def process(ford):
             (dirName, fileName) = os.path.split(ford)
             fileBaseName = os.path.splitext(fileName)[0]
             
-            doprint("filename: " + fileName + "\n")
+            doprint("filename: " + fileName + "\n", 1)
             
             dtsfile = fileBaseName + '.dts'
             tempdtsfile = os.path.join(tempdir, dtsfile)
@@ -190,9 +193,9 @@ def process(ford):
                 dtstrackid = altdtstrackid
             
             if not dtstrackid:
-                doprint("  No DTS track found\n")
+                doprint("  No DTS track found\n", 1)
             elif alreadygotac3 and not args.force:
-                doprint("  Already has AC3 track\n")
+                doprint("  Already has AC3 track\n", 1)
             else:
                 # get dtstrack info
                 output = subprocess.check_output(["mkvinfo", ford])
@@ -349,7 +352,7 @@ def process(ford):
                 elapsed = (time.time() - starttime)
                 minutes = int(elapsed / 60)
                 seconds = int(elapsed) % 60
-                doprint("  " + fileName + " finished in: " + str(minutes) + " minutes " + str(seconds) + " seconds\n")
+                doprint("  " + fileName + " finished in: " + str(minutes) + " minutes " + str(seconds) + " seconds\n", 1)
 
                 return fname
 
@@ -388,4 +391,4 @@ seconds = int(totaltime) % 60
 if sab:
     sys.stdout.write("mkv dts -> ac3 conversion: " + str(minutes) + " minutes " + str(seconds) + " seconds")
 else:
-    doprint("Total Time: " + str(minutes) + " minutes " + str(seconds) + " seconds")
+    doprint("Total Time: " + str(minutes) + " minutes " + str(seconds) + " seconds", 1)
