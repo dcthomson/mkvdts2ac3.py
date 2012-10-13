@@ -43,7 +43,7 @@ Usage
 
 <pre>
 usage: mkvdts2ac3.py [-h] [-c TITLE] [-d] [--destdir DIRECTORY] [-e] [-f] [-i]
-                     [-k] [-n] [--new] [-o] [-r] [-s MODE]
+                     [-k] [-n] [--new] [--md5] [-o] [-r] [-s MODE]
                      [--sabdestdir DIRECTORY] [-t TRACKID] [-w FOLDER] [-v]
                      [-V] [--test] [--debug]
                      FileOrDirectory [FileOrDirectory ...]
@@ -67,6 +67,9 @@ optional arguments:
   -k, --keepdts         Keep external DTS track (implies '-n')
   -n, --nodts           Do not retain the DTS track
   --new                 Do not copy over original. Create new adjacent file
+  --md5                 check md5 of files before removing the original if
+                        destination directory is on a different device than
+                        the original file
   -o, --overwrite       Overwrite file if already there. This only applies if
                         destdir or sabdestdir is set
   -r, --recursive       Recursively descend into directories
