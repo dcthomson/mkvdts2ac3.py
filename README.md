@@ -1,10 +1,12 @@
 `mkvdts2ac3.py` is a python script which can be used for converting the DTS in
-Matroska (MKV) files to AC3. It provides you with a healthy set of options
-for controlling the resulting file.
+Matroska (MKV) files to AC3 on most operating systems including windows. It provides
+you with a set of options for controlling the resulting file.
 
 I just recreated mkvdts2ac3.sh which was created by Jake Wharton and Chris Hoekstra.
 I Figured that most people are using this with sabnzbd which requires python so a
-non-os specific solution would help people out (as well as myself)
+non-os specific solution would help people out (as well as myself). There are a
+few extras I have added such as, sabnzbd support, recursively decending directories,
+and overwrite mode.
 
 Installation
 ============
@@ -44,12 +46,12 @@ usage: mkvdts2ac3.py [-h] [-c TITLE] [-d] [--destdir DIRECTORY] [-e] [-f] [-i]
                      [-k] [-n] [--new] [-o] [-r] [-s MODE]
                      [--sabdestdir DIRECTORY] [-t TRACKID] [-w FOLDER] [-v]
                      [-V] [--test] [--debug]
-                     ForD [ForD ...]
+                     FileOrDirectory [FileOrDirectory ...]
 
 convert matroska (.mkv) video files audio portion from dts to ac3
 
 positional arguments:
-  ForD                  a file or directory (wildcards may be used)
+  FileOrDirectory       a file or directory (wildcards may be used)
 
 optional arguments:
   -h, --help            show this help message and exit

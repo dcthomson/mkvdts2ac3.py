@@ -53,7 +53,7 @@ if os.path.isfile(configFilename):
     
     parser.set_defaults(**defaults)
 
-parser.add_argument('fileordir', metavar='ForD', nargs='+', help='a file or directory (wildcards may be used)')
+parser.add_argument('fileordir', metavar='FileOrDirectory', nargs='+', help='a file or directory (wildcards may be used)')
 
 parser.add_argument("-c", "--custom", metavar="TITLE", help="Custom AC3 track title")
 parser.add_argument("-d", "--default", help="Mark AC3 track as default", action="store_true")
@@ -78,6 +78,9 @@ parser.add_argument("--debug", help="Print commands and pause before executing e
 
 args = parser.parse_args()
 
+if not args.verbose:
+    args.verbose = 0
+
 if args.verbose < 2 and (args.test or args.debug):
     args.verbose = 2
     
@@ -88,7 +91,7 @@ if args.debug and args.verbose == 0:
     args.verbose = 1
 
 def doprint(mystr, v):
-    if v >= args.verbose:
+    if args.verbose >= v:
         sys.stdout.write(mystr)
     
 def runcommand(title, cmdlist):
@@ -99,7 +102,7 @@ def runcommand(title, cmdlist):
             cmdstr = ''
             for e in cmdlist:
                 cmdstr += e + ' '
-            print "\n" + cmdstr.rstrip()
+            print "\n    " + cmdstr.rstrip()
     if args.debug:
         raw_input("Press Enter to continue...")
     if not args.test:
@@ -111,6 +114,8 @@ def runcommand(title, cmdlist):
         elapsed = (time.time() - cmdstarttime)
         minutes = int(elapsed / 60)
         seconds = int(elapsed) % 60
+        if args.verbose >= 2:
+            sys.stdout.write("  ")
         print str(minutes) + "min " + str(seconds) + " sec"
 
 def find_mount_point(path):
@@ -302,8 +307,6 @@ def process(ford):
                     remux.append("--compression")
                     remux.append(videotrackid + ":" + comp)
                     remux.append(ford)
-                    
-                    print "comp: " + comp
                     
                     # If user wants new AC3 as default then add appropriate arguments to command
                     if args.default:
