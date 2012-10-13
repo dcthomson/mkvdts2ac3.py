@@ -134,6 +134,18 @@ def getmd5(self, f, block_size=2**12):
         md5.update(data)
     return md5.hexdigest()
 
+def check_md5tree(self, orig, dest):
+    rt = False
+    for ofile in os.listdir(orig):
+        if os.path.isdir(ofile):
+            odir = os.path.abspath(ofile)
+            ddir = os.path.join(dest, ofile)
+            rt = check_md5tree(odir, ddir)
+        else:
+            if getmd5(ofile) == getmd5(os.path.join(dest, ofile)):
+                rt = True
+    return rt
+
 def process(ford):
     if os.path.isdir(ford):
         if args.recursive:
@@ -351,7 +363,8 @@ def process(ford):
                     if not args.external:
                         os.remove(tempac3file)
                     os.remove(temptcfile)
-                    os.rmdir(tempdir)
+                    if not os.listdir(tempdir):
+                        os.rmdir(tempdir)
 
                 #~ print out time taken
                 elapsed = (time.time() - starttime)
@@ -401,13 +414,22 @@ for a in args.fileordir:
                     if os.path.exists(destfile):
                         if args.overwrite:
                             os.remove(destfile)
-                            os.rename(os.path.join(dirName, fname), destfile)
+                            os.rename(origfile, destfile)
                         else:
                             print "File " + destfile + " already exists"
                     else:
-                        os.rename(os.path.join(dirName, fname), destfile)
+                        os.rename(origfile, destfile)
             else:
-                shutil.move(os.path.abspath(ford), os.path.join(destdir, os.path.basename(os.path.normpath(ford))))
+                origpath = os.path.abspath(ford)
+                destpath = os.path.join(destdir, os.path.basename(os.path.normpath(ford)))
+                if args.md5 and (find_mount_point(origpath) != find_mount_point(destpath)):
+                    shutil.copytree(origpath, destpath)
+                    if check_md5tree(origpath, destpath):
+                        shutil.rmtree(origpath)
+                    else:
+                        print "MD5's don't match."
+                else:
+                    shutil.move(origpath, destpath)
     
 totaltime = (time.time() - totalstime)
 minutes = int(totaltime / 60)
