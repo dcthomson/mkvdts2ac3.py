@@ -63,6 +63,7 @@ parser.add_argument("-e", "--external", action="store_true",
 parser.add_argument("-f", "--force", help="Force processing when AC3 track is detected", action="store_true")
 parser.add_argument("-i", "--initial", help="New AC3 track will be first in the file", action="store_true")
 parser.add_argument("-k", "--keepdts", help="Keep external DTS track (implies '-n')", action="store_true")
+parser.add_argument("--md5", help="check md5 of files before removing the original if destination directory is on a different device than the original file", action="store_true")
 parser.add_argument("-n", "--nodts", help="Do not retain the DTS track", action="store_true")
 parser.add_argument("--new", help="Do not copy over original. Create new adjacent file", action="store_true")
 parser.add_argument("-o", "--overwrite", help="Overwrite file if already there. This only applies if destdir or sabdestdir is set", action="store_true")
@@ -378,14 +379,33 @@ for a in args.fileordir:
             if fname:
                 (dirName, fileName) = os.path.split(ford)
                 destfile = os.path.join(destdir, fname)
-                if os.path.exists(destfile):
-                    if args.overwrite:
-                        os.remove(destfile)
-                        os.rename(os.path.join(dirName, fname), destfile)
+                origfile = os.path.join(dirName, fname)
+                if args.md5 and (find_mount_point(dirName) != find_mount_point(destdir)):
+                    if os.path.exists(destfile):
+                        if args.overwrite:
+                            os.remove(destfile)
+                            shutil.copyfile(origfile, destfile)
+                            if getmd5(origfile) == getmd5(destfile):
+                                os.remove(origfile)
+                            else:
+                                print "MD5's don't match."
+                        else:
+                            print "File " + destfile + " already exists"
                     else:
-                        print "File " + destfile + "already exists"
-                else:
-                    os.rename(os.path.join(dirName, fname), destfile)
+                        shutil.copyfile(origfile, destfile)
+                        if getmd5(origfile) == getmd5(destfile):
+                            os.remove(origfile)
+                        else:
+                            print "MD5's don't match."
+                else:  
+                    if os.path.exists(destfile):
+                        if args.overwrite:
+                            os.remove(destfile)
+                            os.rename(os.path.join(dirName, fname), destfile)
+                        else:
+                            print "File " + destfile + " already exists"
+                    else:
+                        os.rename(os.path.join(dirName, fname), destfile)
             else:
                 shutil.move(os.path.abspath(ford), os.path.join(destdir, os.path.basename(os.path.normpath(ford))))
     
