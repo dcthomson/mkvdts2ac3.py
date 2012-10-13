@@ -297,8 +297,6 @@ def process(ford):
                             audiotracks = [audiotrack for audiotrack in audiotracks if audiotrack != dtstrackid]
                             remux.append("-a")
                             remux.append(",".join(audiotracks))
-                            if args.compress:
-                                comp = args.compress
                             for tid in audiotracks:
                                 remux.append("--compression")
                                 remux.append(tid + ":" + comp)
@@ -311,7 +309,7 @@ def process(ford):
                     # If user wants new AC3 as default then add appropriate arguments to command
                     if args.default:
                         remux.append("--default-track")
-                        remux.append("0")
+                        remux.append("0:0")
                     
                     # Set the language
                     remux.append("--language")
