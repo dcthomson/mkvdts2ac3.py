@@ -126,25 +126,34 @@ def find_mount_point(path):
         path = os.path.dirname(path)
     return path
 
-def getmd5(f, block_size=2**12):
+def getmd5(fname, block_size=2**12):
     md5 = hashlib.md5()
-    while True:
-        data = f.read(block_size)
-        if not data:
-            break
-        md5.update(data)
+    f = open(fname, 'r')
+    try:
+        while True:
+            data = f.read(block_size)
+            if not data:
+                break
+            md5.update(data)
+        print md5.hexdigest()
+    finally:
+        f.close()
     return md5.hexdigest()
 
 def check_md5tree(orig, dest):
     rt = True
+    orig = os.path.abspath(orig)
+    dest = os.path.abspath(dest)
     for ofile in os.listdir(orig):
         if rt == True:
-            if os.path.isdir(ofile):
-                odir = os.path.abspath(ofile)
+            if os.path.isdir(os.path.join(orig, ofile)):
+                print "dir: " + os.path.join(orig, ofile)
+                odir = os.path.join(orig, ofile)
                 ddir = os.path.join(dest, ofile)
                 rt = check_md5tree(odir, ddir)
             else:
-                if getmd5(ofile) != getmd5(os.path.join(dest, ofile)):
+                print "file: " + os.path.join(orig, ofile)
+                if getmd5(os.path.join(orig, ofile)) != getmd5(os.path.join(dest, ofile)):
                     rt = False
     return rt
 
