@@ -87,6 +87,7 @@ if args.verbose < 2 and (args.test or args.debug):
     
 if sab:
     args.fileordir = [args.fileordir[0]]
+    args.verbose = 3
 
 if args.debug and args.verbose == 0:
     args.verbose = 1
@@ -125,7 +126,7 @@ def find_mount_point(path):
         path = os.path.dirname(path)
     return path
 
-def getmd5(self, f, block_size=2**12):
+def getmd5(f, block_size=2**12):
     md5 = hashlib.md5()
     while True:
         data = f.read(block_size)
@@ -134,16 +135,17 @@ def getmd5(self, f, block_size=2**12):
         md5.update(data)
     return md5.hexdigest()
 
-def check_md5tree(self, orig, dest):
-    rt = False
+def check_md5tree(orig, dest):
+    rt = True
     for ofile in os.listdir(orig):
-        if os.path.isdir(ofile):
-            odir = os.path.abspath(ofile)
-            ddir = os.path.join(dest, ofile)
-            rt = check_md5tree(odir, ddir)
-        else:
-            if getmd5(ofile) == getmd5(os.path.join(dest, ofile)):
-                rt = True
+        if rt == True:
+            if os.path.isdir(ofile):
+                odir = os.path.abspath(ofile)
+                ddir = os.path.join(dest, ofile)
+                rt = check_md5tree(odir, ddir)
+            else:
+                if getmd5(ofile) != getmd5(os.path.join(dest, ofile)):
+                    rt = False
     return rt
 
 def process(ford):
