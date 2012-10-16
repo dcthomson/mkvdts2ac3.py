@@ -34,8 +34,9 @@ sab = False
 if len(sys.argv) == 8:
     nzbgroup = sys.argv[6]
     ppstatus = sys.argv[7]
-    if int(ppstatus) >= 0 and int(ppstatus) <= 3 and "." in nzbgroup:
-        sab = True
+    if ppstatus.isdigit():
+        if int(ppstatus) >= 0 and int(ppstatus) <= 3 and "." in nzbgroup:
+            sab = True
 
 # create parser
 parser = argparse.ArgumentParser(description='convert matroska (.mkv) video files audio portion from dts to ac3')
@@ -128,16 +129,13 @@ def find_mount_point(path):
 
 def getmd5(fname, block_size=2**12):
     md5 = hashlib.md5()
-    f = open(fname, 'r')
-    try:
+    with open(fname, 'r') as f:
         while True:
             data = f.read(block_size)
             if not data:
                 break
             md5.update(data)
-        print md5.hexdigest()
-    finally:
-        f.close()
+        doprint(fname + ": " + md5.hexdigest(), 3)
     return md5.hexdigest()
 
 def check_md5tree(orig, dest):
@@ -147,12 +145,12 @@ def check_md5tree(orig, dest):
     for ofile in os.listdir(orig):
         if rt == True:
             if os.path.isdir(os.path.join(orig, ofile)):
-                print "dir: " + os.path.join(orig, ofile)
+                doprint("dir: " + os.path.join(orig, ofile), 3)
                 odir = os.path.join(orig, ofile)
                 ddir = os.path.join(dest, ofile)
                 rt = check_md5tree(odir, ddir)
             else:
-                print "file: " + os.path.join(orig, ofile)
+                doprint("file: " + os.path.join(orig, ofile), 3)
                 if getmd5(os.path.join(orig, ofile)) != getmd5(os.path.join(dest, ofile)):
                     rt = False
     return rt
@@ -434,11 +432,16 @@ for a in args.fileordir:
                 origpath = os.path.abspath(ford)
                 destpath = os.path.join(destdir, os.path.basename(os.path.normpath(ford)))
                 if args.md5 and (find_mount_point(origpath) != find_mount_point(destpath)):
-                    shutil.copytree(origpath, destpath)
-                    if check_md5tree(origpath, destpath):
-                        shutil.rmtree(origpath)
+                    if os.path.exists(destpath) and args.overwrite:
+                        shutil.rmtree(destpath)
+                    elif os.path.exists(destpath):    
+                        print "Directory " + destpath + " already exists"
                     else:
-                        print "MD5's don't match."
+                        shutil.copytree(origpath, destpath)
+                        if check_md5tree(origpath, destpath):
+                            shutil.rmtree(origpath)
+                        else:
+                            print "MD5's don't match."
                 else:
                     shutil.move(origpath, destpath)
     

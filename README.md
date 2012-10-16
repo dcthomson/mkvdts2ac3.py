@@ -3,7 +3,7 @@ Matroska (MKV) files to AC3 on most operating systems including windows. It prov
 you with a set of options for controlling the resulting file.
 
 A recreation of mkvdts2ac3.sh which was created by Jake Wharton and Chris Hoekstra.
-I Figured that most people are using this with sabnzbd which requires python so a
+I figured that most people are using this with sabnzbd which requires python so a
 non-os specific solution would help people out (as well as myself). There are a
 few extras I have added such as, sabnzbd support, recursively decending directories,
 and overwrite mode.
