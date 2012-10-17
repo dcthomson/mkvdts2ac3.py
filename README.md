@@ -1,6 +1,7 @@
-`mkvdts2ac3.py` is a python script which can be used for converting the DTS in
-Matroska (MKV) files to AC3 on most operating systems including windows. It provides
-you with a set of options for controlling the resulting file.
+`mkvdts2ac3.py` is a python script for linux, windows or os x which can be used
+for converting the DTS in Matroska (MKV) files to AC3 on most operating systems
+including windows. It provides you with a set of options for controlling the resulting
+file.
 
 A recreation of mkvdts2ac3.sh which was created by Jake Wharton and Chris Hoekstra.
 I figured that most people are using this with sabnzbd which requires python so a
