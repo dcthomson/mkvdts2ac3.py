@@ -139,7 +139,9 @@ SABnzbd
 Here is an example of how to set up with SABnzbd
 
 1. make sure that mkvdts2ac3.py is in your sabnzbd post-processing scripts folder
+
 2. set the category Script to mkvdts2ac3.py and Folder/Path to where you want the files downloaded to
+
     * if you are using something with a renamer / sorter such as Couch Potato set the Folder/Path to any folder you want the downloaded files to be put in while the conversion is being done. Then set the #sabdestdir in the mkvdts2ac3.cfg to the directory that Couch Potato looks for completed downloads.
 
 
