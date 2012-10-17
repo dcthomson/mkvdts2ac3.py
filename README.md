@@ -28,9 +28,12 @@ If you have `git` installed, you can just run
 `git clone git://github.com/dcthomson/mkvdts2ac3.py.git`.
 
 You can download the script directly with wget or curl:
-  wget https://raw.github.com/dcthomson/mkvdts2ac3.py/master/mkvdts2ac3.py
+
+wget https://raw.github.com/dcthomson/mkvdts2ac3.py/master/mkvdts2ac3.py
+
   -or-
-  curl -O https://raw.github.com/dcthomson/mkvdts2ac3.py/master/mkvdts2ac3.py
+
+curl -O https://raw.github.com/dcthomson/mkvdts2ac3.py/master/mkvdts2ac3.py
 
 Otherwise you can click the "Download" link on the GitHub project page and
 download an archive and extract its contents.
@@ -92,6 +95,53 @@ optional arguments:
   --test                Print commands only, execute nothing
   --debug               Print commands and pause before executing each
 </pre>
+
+
+Configuration File
+------------------
+If you want to set some options as default you can use the configuration file: mkvdts2ac3.cfg
+<pre>
+[mkvdts2ac3]
+
+# These options take an argument.
+# To enable you must remove the # at the beginning of the line and supply the
+# argument. 
+ 
+#sabdestdir =
+#custom =
+#compress =
+#destdir =
+#track =
+#wd =
+#verbose =
+
+
+# These options don't take any arguments, they are only true or false
+# false is the default
+# remove the # at the beginning of the line to enable the option
+
+#default = True
+#external = True
+#force = True
+#initial = True
+#keepdts = True
+#nodts = True
+#new = True
+#overwrite = True
+#recursive = True
+#test = True
+#debug = True
+</pre>
+
+
+SABnzbd
+-------
+Here is an example of how to set up with SABnzbd
+
+1. make sure that mkvdts2ac3.py is in your sabnzbd post-processing scripts folder
+2. set the category Script to mkvdts2ac3.py and Folder/Path to where you want the files downloaded to
+    * if you are using something with a renamer / sorter such as Couch Potato set the Folder/Path to any folder you want the downloaded files to be put in while the conversion is being done. Then set the #sabdestdir in the mkvdts2ac3.cfg to the directory that Couch Potato looks for completed downloads.
+
 
   
 Developed By
