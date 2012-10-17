@@ -129,13 +129,13 @@ def find_mount_point(path):
 
 def getmd5(fname, block_size=2**12):
     md5 = hashlib.md5()
-    with open(fname, 'r') as f:
+    with open(fname, 'rb') as f:
         while True:
             data = f.read(block_size)
             if not data:
                 break
             md5.update(data)
-        doprint(fname + ": " + md5.hexdigest(), 3)
+        doprint(fname + ": " + md5.hexdigest() + "\n", 3)
     return md5.hexdigest()
 
 def check_md5tree(orig, dest):
@@ -145,12 +145,12 @@ def check_md5tree(orig, dest):
     for ofile in os.listdir(orig):
         if rt == True:
             if os.path.isdir(os.path.join(orig, ofile)):
-                doprint("dir: " + os.path.join(orig, ofile), 3)
+                doprint("dir: " + os.path.join(orig, ofile) + "\n", 3)
                 odir = os.path.join(orig, ofile)
                 ddir = os.path.join(dest, ofile)
                 rt = check_md5tree(odir, ddir)
             else:
-                doprint("file: " + os.path.join(orig, ofile), 3)
+                doprint("file: " + os.path.join(orig, ofile) + "\n", 3)
                 if getmd5(os.path.join(orig, ofile)) != getmd5(os.path.join(dest, ofile)):
                     rt = False
     return rt
@@ -381,7 +381,7 @@ def process(ford):
                 seconds = int(elapsed) % 60
                 doprint("  " + fileName + " finished in: " + str(minutes) + " minutes " + str(seconds) + " seconds\n", 1)
 
-                return fname
+            return fname
 
 totalstime = time.time()
 for a in args.fileordir:
@@ -414,6 +414,7 @@ for a in args.fileordir:
                         else:
                             print "File " + destfile + " already exists"
                     else:
+                        doprint("copying: " + origfile + " --> " + destfile + "\n", 3)
                         shutil.copyfile(origfile, destfile)
                         if getmd5(origfile) == getmd5(destfile):
                             os.remove(origfile)
