@@ -62,9 +62,11 @@ parser.add_argument("--destdir", metavar="DIRECTORY", help="Destination Director
 parser.add_argument("-e", "--external", action="store_true",
                     help="Leave AC3 track out of file. Does not modify the original matroska file. This overrides '-n' and '-d' arguments")
 parser.add_argument("-f", "--force", help="Force processing when AC3 track is detected", action="store_true")
+parser.add_argument("--ffmpegpath", help="Path of ffmpeg", action="store_true")
 parser.add_argument("-i", "--initial", help="New AC3 track will be first in the file", action="store_true")
 parser.add_argument("-k", "--keepdts", help="Keep external DTS track (implies '-n')", action="store_true")
 parser.add_argument("--md5", help="check md5 of files before removing the original if destination directory is on a different device than the original file", action="store_true")
+parser.add_argument("--mkvtoolnixpath", help="Path of mkvextract, mkvinfo and mkvmerge", action="store_true")
 parser.add_argument("-n", "--nodts", help="Do not retain the DTS track", action="store_true")
 parser.add_argument("--new", help="Do not copy over original. Create new adjacent file", action="store_true")
 parser.add_argument("-o", "--overwrite", help="Overwrite file if already there. This only applies if destdir or sabdestdir is set", action="store_true")
@@ -79,6 +81,61 @@ parser.add_argument("--test", help="Print commands only, execute nothing", actio
 parser.add_argument("--debug", help="Print commands and pause before executing each", action="store_true")
 
 args = parser.parse_args()
+
+# set ffmpeg and mkvtoolnix paths
+if args.mkvtoolnixpath:
+    mkvinfo = os.path.join(args.mkvtoolnixpath, "mkvinfo")
+    mkvmerge = os.path.join(args.mkvtoolnixpath, "mkvmerge")
+    mkvextract = os.path.join(args.mkvtoolnixpath, "mkvextract")
+if not args.mkvtoolnixpath or os.path.exists(mkvinfo):
+    mkvinfo = "mkvinfo"
+if not args.mkvtoolnixpath or os.path.exists(mkvmerge):
+    mkvmerge = "mkvmerge"
+if not args.mkvtoolnixpath or os.path.exists(mkvextract):
+    mkvextract = "mkvextract"
+    
+if args.ffmpegpath:
+    ffmpeg = os.path.join(args.ffmpegpath, "ffmpeg")
+if not args.ffmpegpath or os.path.exists(ffmpeg):
+    ffmpeg = "ffmpeg"
+
+# check paths
+def which(program):
+    if sys.platform == "win32" and not program.endswith(".exe"): 
+        program += ".exe"
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
+
+    fpath = os.path.split(program)[0]
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
+
+    return None
+
+missingprereqs = False
+missinglist = []
+if not which(mkvinfo):
+    missingprereqs = True
+    missinglist.append("mkvinfo")
+if not which(mkvmerge):
+    missingprereqs = True
+    missinglist.append("mkvmerge")
+if not which(ffmpeg):
+    missingprereqs = True
+    missinglist.append("ffmpeg")
+if missingprereqs:
+    sys.stdout.write("You are missing the following prerequisite tools: ")
+    for tool in missinglist:
+        sys.stdout.write(tool + " ")
+    if not args.mkvtoolnixpath and not args.ffmpegpath:
+        print "\nYou can use --mkvtoolnixpath and --ffmpegpath to specify the path"    
+    sys.exit(1)
 
 if not args.verbose:
     args.verbose = 0
