@@ -26,6 +26,7 @@ import sys
 import ConfigParser
 import shutil
 import hashlib
+import textwrap
 
 version = "1.0"
 
@@ -120,6 +121,9 @@ def which(program):
 
 missingprereqs = False
 missinglist = []
+if not which(mkvextract):
+    missingprereqs = True
+    missinglist.append("mkvextract")
 if not which(mkvinfo):
     missingprereqs = True
     missinglist.append("mkvinfo")
@@ -162,7 +166,9 @@ def runcommand(title, cmdlist):
             cmdstr = ''
             for e in cmdlist:
                 cmdstr += e + ' '
-            print "\n    " + cmdstr.rstrip()
+            print
+            print "    Running command:"
+            print textwrap.fill(cmdstr.rstrip(), initial_indent='      ', subsequent_indent='      ')
     if args.debug:
         raw_input("Press Enter to continue...")
     if not args.test:
@@ -175,7 +181,7 @@ def runcommand(title, cmdlist):
         minutes = int(elapsed / 60)
         seconds = int(elapsed) % 60
         if args.verbose >= 2:
-            sys.stdout.write("  ")
+            sys.stdout.write("    ")
         print str(minutes) + "min " + str(seconds) + " sec"
 
 def find_mount_point(path):
@@ -219,7 +225,7 @@ def process(ford):
                 process(os.path.join(ford, f))
     else:
         # check if file is an mkv file
-        child = subprocess.Popen(["mkvmerge", "-i", ford], stdout=subprocess.PIPE)
+        child = subprocess.Popen([mkvmerge, "-i", ford], stdout=subprocess.PIPE)
         child.communicate()[0]
         if child.returncode == 0:
             starttime = time.time()
@@ -251,7 +257,7 @@ def process(ford):
             fname = fileName
             
             # get dts track id and video track id
-            output = subprocess.check_output(["mkvmerge", "-i", ford])
+            output = subprocess.check_output([mkvmerge, "-i", ford])
             lines = output.split("\n")
             altdtstrackid = False
             dtstrackid = False
@@ -285,7 +291,7 @@ def process(ford):
                 doprint("  Already has AC3 track\n", 1)
             else:
                 # get dtstrack info
-                output = subprocess.check_output(["mkvinfo", ford])
+                output = subprocess.check_output([mkvinfo, ford])
                 lines = output.split("\n")
                 dtstrackinfo = []
                 startcount = 0
@@ -324,7 +330,7 @@ def process(ford):
                 
                 # extract timecodes
                 tctitle = "  Extracting Timecodes..."
-                tccmd = ["mkvextract", "timecodes_v2", ford, dtstrackid + ":" + temptcfile]
+                tccmd = [mkvextract, "timecodes_v2", ford, dtstrackid + ":" + temptcfile]
                 runcommand(tctitle, tccmd)
                 
                 delay = False
@@ -339,12 +345,12 @@ def process(ford):
                 
                 # extract dts track
                 extracttitle = "  Extracting DTS track..."
-                extractcmd = ["mkvextract", "tracks", ford, dtstrackid + ':' + tempdtsfile]
+                extractcmd = [mkvextract, "tracks", ford, dtstrackid + ':' + tempdtsfile]
                 runcommand(extracttitle, extractcmd)
                 
                 # convert DTS to AC3
                 converttitle = "  Converting DTS to AC3..."
-                convertcmd = ["ffmpeg", "-y", "-i", tempdtsfile, "-acodec", "ac3", "-ac", "6", "-ab", "448k", tempac3file]
+                convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "ac3", "-ac", "6", "-ab", "448k", tempac3file]
                 runcommand(converttitle, convertcmd)
 
                 if args.external:
@@ -355,7 +361,7 @@ def process(ford):
                     # remux
                     remuxtitle = "  Remuxing AC3 into MKV..."
                     # Start to "build" command
-                    remux = ["mkvmerge"]
+                    remux = [mkvmerge]
                     
                     # Puts the AC3 track as the second in the file if indicated as initial
                     if args.initial:
