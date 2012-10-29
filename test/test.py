@@ -31,7 +31,8 @@ if os.path.isdir("tests"):
     print "DONE"
 
 os.makedirs("tests")
-os.makedirs(extdir)
+if extdir:
+    os.makedirs(extdir)
 
 mkvdts2ac3cmd = os.path.join("..", "mkvdts2ac3.py")
 
@@ -178,7 +179,7 @@ f.write(subprocess.check_output(["mkvinfo", testfile]))
 f.close()
 print "DONE"
 
-if os.path.isdir(extdir):
+if extdir:
     # md5
     test = "md5"
     sys.stdout.write('Running test "' + test + '"...')
@@ -289,7 +290,7 @@ f.write(output)
 f.close()
 print "DONE"
 
-if os.path.isdir(extdir):
+if extdir:
     # recursive md5 tree
     test = "recursive md5 tree"
     sys.stdout.write('Running test "' + test + '"...')
