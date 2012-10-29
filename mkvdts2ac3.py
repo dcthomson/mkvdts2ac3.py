@@ -192,7 +192,7 @@ def runcommand(title, cmdlist):
     if not args.test:
         if args.verbose >= 3:
             subprocess.call(cmdlist)
-        elif args.verbose == 1:
+        elif args.verbose >= 1:
             if "ffmpeg" in cmdlist[0]:
                 proc = subprocess.Popen(cmdlist, stderr=subprocess.PIPE)
                 line = ''
@@ -243,13 +243,6 @@ def runcommand(title, cmdlist):
                 print "\r" + title + elapsedstr(cmdstarttime)
         else:
             subprocess.call(cmdlist, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-#    if args.verbose >= 1:
-#        elapsed = (time.time() - cmdstarttime)
-#        minutes = int(elapsed / 60)
-#        seconds = int(elapsed) % 60
-#        if args.verbose >= 2:
-#            sys.stdout.write("    ")
-#        print str(minutes) + "min " + str(seconds) + "sec"
 
 def find_mount_point(path):
     path = os.path.abspath(path)
