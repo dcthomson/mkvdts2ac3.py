@@ -157,8 +157,28 @@ if args.debug and args.verbose == 0:
 def doprint(mystr, v):
     if args.verbose >= v:
         sys.stdout.write(mystr)
+
+def elapsedstr(starttime):
+    elapsed = (time.time() - starttime)
+    minutes = int(elapsed / 60)
+    mplural = 's'
+    if minutes == 1:
+        mplural = ''
+    seconds = int(elapsed) % 60
+    splural = 's'
+    if seconds == 1:
+        splural = ''
+    return str(minutes) + " minute" + mplural + " " + str(seconds) + " second" + splural
+
+def getduration(time):
+    (hms, ms) = time.split('.')
+    (h, m, s) = hms.split(':')
+    totalms = int(ms) + (int(s) * 100) + (int(m) * 100 * 60) + (int(h) * 100 * 60 * 60)
+    return totalms
     
 def runcommand(title, cmdlist):
+    if args.debug:
+        raw_input("Press Enter to continue...")
     cmdstarttime = time.time()
     if args.verbose >= 1:
         sys.stdout.write(title)
@@ -169,20 +189,67 @@ def runcommand(title, cmdlist):
             print
             print "    Running command:"
             print textwrap.fill(cmdstr.rstrip(), initial_indent='      ', subsequent_indent='      ')
-    if args.debug:
-        raw_input("Press Enter to continue...")
     if not args.test:
         if args.verbose >= 3:
             subprocess.call(cmdlist)
+        elif args.verbose == 1:
+            if "ffmpeg" in cmdlist[0]:
+                proc = subprocess.Popen(cmdlist, stderr=subprocess.PIPE)
+                line = ''
+                duration_regex = re.compile("  Duration: (\d+:\d\d:\d\d\.\d\d),")
+                progress_regex = re.compile("size= +\d+.*time=(\d+:\d\d:\d\d\.\d\d) bitrate=")
+                duration = False
+                while True:
+                    if not duration:
+                        durationline = proc.stderr.readline()
+                        match = duration_regex.match(durationline)
+                        if match:
+                            duration = getduration(match.group(1))
+                    else:  
+                        out = proc.stderr.read(1)
+                        if out == '' and proc.poll() != None:
+                            break
+                        if out != '\r':
+                            line += out
+                        else:
+                            if 'size= ' in line:
+                                match = progress_regex.search(line)
+                                if match:
+                                    percentage = int(float(getduration(match.group(1)) / float(duration)) * 100)
+                                    if percentage > 100:
+                                        percentage = 100
+                                    sys.stdout.write("\r" + title + str(percentage) + '%')
+                            line = ''
+                        sys.stdout.flush()
+                print "\r" + title + elapsedstr(cmdstarttime)
+            else:
+                proc = subprocess.Popen(cmdlist, stdout=subprocess.PIPE)
+                line = ''
+                progress_regex = re.compile("Progress: (\d+%)")
+                while True:
+                    out = proc.stdout.read(1)
+                    if out == '' and proc.poll() != None:
+                        break
+                    if out != '\r':
+                        line += out
+                    else:
+                        if 'Progress: ' in line:
+                            match = progress_regex.search(line)
+                            if match:
+                                percentage = match.group(1)
+                                sys.stdout.write("\r" + title + percentage)
+                        line = ''
+                    sys.stdout.flush()
+                print "\r" + title + elapsedstr(cmdstarttime)
         else:
             subprocess.call(cmdlist, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if args.verbose >= 1:
-        elapsed = (time.time() - cmdstarttime)
-        minutes = int(elapsed / 60)
-        seconds = int(elapsed) % 60
-        if args.verbose >= 2:
-            sys.stdout.write("    ")
-        print str(minutes) + "min " + str(seconds) + " sec"
+#    if args.verbose >= 1:
+#        elapsed = (time.time() - cmdstarttime)
+#        minutes = int(elapsed / 60)
+#        seconds = int(elapsed) % 60
+#        if args.verbose >= 2:
+#            sys.stdout.write("    ")
+#        print str(minutes) + "min " + str(seconds) + "sec"
 
 def find_mount_point(path):
     path = os.path.abspath(path)
@@ -329,7 +396,7 @@ def process(ford):
                             dtsname = dtsname.replace("dts", "ac3")
                 
                 # extract timecodes
-                tctitle = "  Extracting Timecodes..."
+                tctitle = "  Extracting Timecodes  [1/4]..."
                 tccmd = [mkvextract, "timecodes_v2", ford, dtstrackid + ":" + temptcfile]
                 runcommand(tctitle, tccmd)
                 
@@ -344,12 +411,12 @@ def process(ford):
                     fp.close()
                 
                 # extract dts track
-                extracttitle = "  Extracting DTS track..."
+                extracttitle = "  Extracting DTS track  [2/4]..."
                 extractcmd = [mkvextract, "tracks", ford, dtstrackid + ':' + tempdtsfile]
                 runcommand(extracttitle, extractcmd)
                 
                 # convert DTS to AC3
-                converttitle = "  Converting DTS to AC3..."
+                converttitle = "  Converting DTS to AC3 [3/4]..."
                 convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "ac3", "-ac", "6", "-ab", "448k", tempac3file]
                 runcommand(converttitle, convertcmd)
 
@@ -359,7 +426,7 @@ def process(ford):
                         fname = ac3file
                 else:
                     # remux
-                    remuxtitle = "  Remuxing AC3 into MKV..."
+                    remuxtitle = "  Remuxing AC3 into MKV [4/4]..."
                     # Start to "build" command
                     remux = [mkvmerge]
                     
@@ -508,11 +575,8 @@ for a in args.fileordir:
                             print "MD5's don't match."
                 else:
                     shutil.move(origpath, destpath)
-    
-totaltime = (time.time() - totalstime)
-minutes = int(totaltime / 60)
-seconds = int(totaltime) % 60
+                    
 if sab:
-    sys.stdout.write("mkv dts -> ac3 conversion: " + str(minutes) + " minutes " + str(seconds) + " seconds")
+    sys.stdout.write("mkv dts -> ac3 conversion: " + elapsedstr(totalstime))
 else:
-    doprint("Total Time: " + str(minutes) + " minutes " + str(seconds) + " seconds", 1)
+    doprint("Total Time: " + elapsedstr(totalstime), 1)
