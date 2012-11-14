@@ -297,7 +297,7 @@ def process(ford):
                 if not os.path.exists(tempdir):
                     os.makedirs(tempdir)
             else:
-                tempdir = tempfile.gettempdir()
+                tempdir = tempfile.mkdtemp()
                 tempdir = os.path.join(tempdir, "mkvdts2ac3")
                 
             (dirName, fileName) = os.path.split(ford)
