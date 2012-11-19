@@ -88,16 +88,16 @@ if args.mkvtoolnixpath:
     mkvinfo = os.path.join(args.mkvtoolnixpath, "mkvinfo")
     mkvmerge = os.path.join(args.mkvtoolnixpath, "mkvmerge")
     mkvextract = os.path.join(args.mkvtoolnixpath, "mkvextract")
-if not args.mkvtoolnixpath or os.path.exists(mkvinfo):
+if not args.mkvtoolnixpath or not os.path.exists(mkvinfo):
     mkvinfo = "mkvinfo"
-if not args.mkvtoolnixpath or os.path.exists(mkvmerge):
+if not args.mkvtoolnixpath or not os.path.exists(mkvmerge):
     mkvmerge = "mkvmerge"
-if not args.mkvtoolnixpath or os.path.exists(mkvextract):
+if not args.mkvtoolnixpath or not os.path.exists(mkvextract):
     mkvextract = "mkvextract"
     
 if args.ffmpegpath:
     ffmpeg = os.path.join(args.ffmpegpath, "ffmpeg")
-if not args.ffmpegpath or os.path.exists(ffmpeg):
+if not args.ffmpegpath or not os.path.exists(ffmpeg):
     ffmpeg = "ffmpeg"
 
 # check paths
@@ -138,7 +138,9 @@ if missingprereqs:
     for tool in missinglist:
         sys.stdout.write(tool + " ")
     if not args.mkvtoolnixpath and not args.ffmpegpath:
-        print "\nYou can use --mkvtoolnixpath and --ffmpegpath to specify the path"    
+        print "\nYou can use --mkvtoolnixpath and --ffmpegpath to specify the path"
+    else:
+        print   
     sys.exit(1)
 
 if not args.verbose:
@@ -280,10 +282,12 @@ def check_md5tree(orig, dest):
 
 def process(ford):
     if os.path.isdir(ford):
+        doprint("    Processing dir:  " + ford + "\n", 3) 
         if args.recursive:
             for f in os.listdir(ford):
                 process(os.path.join(ford, f))
     else:
+        doprint("    Processing file: " + ford + "\n", 3) 
         # check if file is an mkv file
         child = subprocess.Popen([mkvmerge, "-i", ford], stdout=subprocess.PIPE)
         child.communicate()[0]
