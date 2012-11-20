@@ -46,9 +46,10 @@ Usage
 
 <pre>
 usage: mkvdts2ac3.py [-h] [-c TITLE] [-d] [--destdir DIRECTORY] [-e] [-f]
-                     [--ffmpegpath] [-i] [-k] [--md5] [--mkvtoolnixpath] [-n]
-                     [--new] [-o] [-r] [-s MODE] [--sabdestdir DIRECTORY]
-                     [-t TRACKID] [-w FOLDER] [-v] [-V] [--test] [--debug]
+                     [--ffmpegpath DIRECTORY] [-i] [-k] [--md5]
+                     [--mkvtoolnixpath DIRECTORY] [-n] [--new] [-o] [-r]
+                     [-s MODE] [--sabdestdir DIRECTORY] [-t TRACKID]
+                     [-w FOLDER] [-v] [-V] [--test] [--debug]
                      FileOrDirectory [FileOrDirectory ...]
 
 convert matroska (.mkv) video files audio portion from dts to ac3
@@ -66,13 +67,15 @@ optional arguments:
                         original matroska file. This overrides '-n' and '-d'
                         arguments
   -f, --force           Force processing when AC3 track is detected
-  --ffmpegpath          Path of ffmpeg
+  --ffmpegpath DIRECTORY
+                        Path of ffmpeg
   -i, --initial         New AC3 track will be first in the file
   -k, --keepdts         Keep external DTS track (implies '-n')
   --md5                 check md5 of files before removing the original if
                         destination directory is on a different device than
                         the original file
-  --mkvtoolnixpath      Path of mkvextract, mkvinfo and mkvmerge
+  --mkvtoolnixpath DIRECTORY
+                        Path of mkvextract, mkvinfo and mkvmerge
   -n, --nodts           Do not retain the DTS track
   --new                 Do not copy over original. Create new adjacent file
   -o, --overwrite       Overwrite file if already there. This only applies if
