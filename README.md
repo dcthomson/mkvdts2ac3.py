@@ -45,8 +45,8 @@ Usage
 =====
 
 <pre>
-usage: mkvdts2ac3.py [-h] [-c TITLE] [-d] [--destdir DIRECTORY] [-e] [-f]
-                     [--ffmpegpath DIRECTORY] [-i] [-k] [--md5]
+usage: mkvdts2ac3.py [-h] [--aac] [-c TITLE] [-d] [--destdir DIRECTORY] [-e]
+                     [-f] [--ffmpegpath DIRECTORY] [-i] [-k] [--md5]
                      [--mkvtoolnixpath DIRECTORY] [-n] [--new] [-o] [-r]
                      [-s MODE] [--sabdestdir DIRECTORY] [-t TRACKID]
                      [-w FOLDER] [-v] [-V] [--test] [--debug]
@@ -59,6 +59,7 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
+  --aac                 Also add aac track
   -c TITLE, --custom TITLE
                         Custom AC3 track title
   -d, --default         Mark AC3 track as default
