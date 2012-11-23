@@ -58,6 +58,7 @@ if os.path.isfile(configFilename):
 parser.add_argument('fileordir', metavar='FileOrDirectory', nargs='+', help='a file or directory (wildcards may be used)')
 
 parser.add_argument("--aac", help="Also add aac track", action="store_true")
+parser.add_argument("--aacstereo", help="Make aac track stereo instead of 6 channel", action="store_true")
 parser.add_argument("-c", "--custom", metavar="TITLE", help="Custom AC3 track title")
 parser.add_argument("-d", "--default", help="Mark AC3 track as default", action="store_true")
 parser.add_argument("--destdir", metavar="DIRECTORY", help="Destination Directory")
@@ -431,7 +432,10 @@ def process(ford):
                 if args.aac:
                     converttitle = "  Converting DTS to AAC [" + str(jobnum) + "/" + str(totaljobs) + "]..."
                     jobnum += 1
-                    convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "aac", "-strict", "experimental", "-ac", "6", "-ab", "448k", tempaacfile]
+                    audiochannels = 6
+                    if args.aacstereo:
+                        audiochannels = 2
+                    convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "aac", "-strict", "experimental", "-ac", audiochannels, "-ab", "448k", tempaacfile]
                     runcommand(converttitle, convertcmd)
 
                 if args.external:
