@@ -57,6 +57,7 @@ if os.path.isfile(configFilename):
 
 parser.add_argument('fileordir', metavar='FileOrDirectory', nargs='+', help='a file or directory (wildcards may be used)')
 
+parser.add_argument("--aac", help="Also add aac track", action="store_true")
 parser.add_argument("-c", "--custom", metavar="TITLE", help="Custom AC3 track title")
 parser.add_argument("-d", "--default", help="Mark AC3 track as default", action="store_true")
 parser.add_argument("--destdir", metavar="DIRECTORY", help="Destination Directory")
@@ -313,6 +314,8 @@ def process(ford):
             tempdtsfile = os.path.join(tempdir, dtsfile)
             ac3file = fileBaseName + '.ac3'
             tempac3file = os.path.join(tempdir, ac3file)
+            aacfile = fileBaseName + '.aac'
+            tempaacfile = os.path.join(tempdir, aacfile)
             tcfile = fileBaseName + '.tc'
             temptcfile = os.path.join(tempdir, tcfile)
             newmkvfile = fileBaseName + '.mkv'
@@ -392,8 +395,14 @@ def process(ford):
                             dtsname = dtsname.replace("DTS", "AC3")
                             dtsname = dtsname.replace("dts", "ac3")
                 
+                totaljobs = 4
+                jobnum = 1
+                if args.aac:
+                    totaljobs += 1 
+                
                 # extract timecodes
-                tctitle = "  Extracting Timecodes  [1/4]..."
+                tctitle = "  Extracting Timecodes  [" + str(jobnum) + "/" + str(totaljobs) + "]..."
+                jobnum += 1
                 tccmd = [mkvextract, "timecodes_v2", ford, dtstrackid + ":" + temptcfile]
                 runcommand(tctitle, tccmd)
                 
@@ -408,14 +417,22 @@ def process(ford):
                     fp.close()
                 
                 # extract dts track
-                extracttitle = "  Extracting DTS track  [2/4]..."
+                extracttitle = "  Extracting DTS track  [" + str(jobnum) + "/" + str(totaljobs) + "]..."
+                jobnum += 1
                 extractcmd = [mkvextract, "tracks", ford, dtstrackid + ':' + tempdtsfile]
                 runcommand(extracttitle, extractcmd)
                 
                 # convert DTS to AC3
-                converttitle = "  Converting DTS to AC3 [3/4]..."
+                converttitle = "  Converting DTS to AC3 [" + str(jobnum) + "/" + str(totaljobs) + "]..."
+                jobnum += 1
                 convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "ac3", "-ac", "6", "-ab", "448k", tempac3file]
                 runcommand(converttitle, convertcmd)
+                
+                if args.aac:
+                    converttitle = "  Converting DTS to AAC [" + str(jobnum) + "/" + str(totaljobs) + "]..."
+                    jobnum += 1
+                    convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "aac", "-strict", "experimental", "-ac", "6", "-ab", "448k", tempaacfile]
+                    runcommand(converttitle, convertcmd)
 
                 if args.external:
                     if not args.test:
@@ -423,7 +440,8 @@ def process(ford):
                         fname = ac3file
                 else:
                     # remux
-                    remuxtitle = "  Remuxing AC3 into MKV [4/4]..."
+                    remuxtitle = "  Remuxing AC3 into MKV [" + str(jobnum) + "/" + str(totaljobs) + "]..."
+                    jobnum += 1
                     # Start to "build" command
                     remux = [mkvmerge]
                     
@@ -479,6 +497,11 @@ def process(ford):
                     remux.append("0:" + comp)
                     remux.append(tempac3file)
                     
+                    # Set track compression scheme and append new AC3
+                    remux.append("--compression")
+                    remux.append("0:" + comp)
+                    remux.append(tempaacfile)
+                    
                     runcommand(remuxtitle, remux)  
 
                     if not args.test:
@@ -498,6 +521,7 @@ def process(ford):
                         os.remove(tempdtsfile)
                     if not args.external:
                         os.remove(tempac3file)
+                        os.remove(tempaacfile)
                     os.remove(temptcfile)
                     if not os.listdir(tempdir):
                         os.rmdir(tempdir)
