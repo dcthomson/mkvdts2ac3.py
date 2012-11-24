@@ -463,9 +463,17 @@ def process(ford):
                     audiochannels = 6
                     if args.aacstereo:
                         audiochannels = 2
-                    convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "aac", "-strict", "experimental", "-ac", str(audiochannels), "-ab", "448k", tempaacfile]
+                    convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "libfaac", "-ac", str(audiochannels), "-ab", "448k", tempaacfile]
                     runcommand(converttitle, convertcmd)
-
+                    if not os.path.isfile(tempaacfile):
+                        convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "libvo_aacenc", "-ac", str(audiochannels), "-ab", "448k", tempaacfile]
+                        runcommand(converttitle, convertcmd)
+                    if not os.path.isfile(tempaacfile):
+                        convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "aac", "-strict", "experimental", "-ac", str(audiochannels), "-ab", "448k", tempaacfile]
+                        runcommand(converttitle, convertcmd)
+                    if os.path.isfile(tempaacfile):
+                        print "ERROR: ffmpeg can't use any aac codecs. Please try to get libfaac, libvo_aacenc, or a newer version of ffmpeg with the experimental aac codec installed"
+                        
                 if args.external:
                     if not args.test:
                         os.rename(tempac3file, os.path.join(dirName, fileBaseName + '.ac3'))
