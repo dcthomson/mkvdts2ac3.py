@@ -27,6 +27,7 @@ import ConfigParser
 import shutil
 import hashlib
 import textwrap
+import errno
 
 version = "1.0"
 
@@ -163,6 +164,13 @@ if args.debug and args.verbose == 0:
 def doprint(mystr, v):
     if args.verbose >= v:
         sys.stdout.write(mystr)
+
+def silentremove(filename):
+    try:
+        os.remove(filename)
+    except OSError, e:
+        if e.errno != errno.ENOENT: # errno.ENOENT = no such file or directory
+            raise # re-raise exception if a different error occured
 
 def elapsedstr(starttime):
     elapsed = (time.time() - starttime)
@@ -397,6 +405,8 @@ def process(ford):
                             ac3name = line.split("+ Name: ")[-1]
                             ac3name = ac3name.replace("DTS", "AC3")
                             ac3name = ac3name.replace("dts", "ac3")
+                            if args.stereo:
+                                ac3name = ac3name.replace("5.1", "Stereo")
                 
                 # get aac track name
                 aacname = False
@@ -408,6 +418,8 @@ def process(ford):
                             aacname = line.split("+ Name: ")[-1]
                             aacname = aacname.replace("DTS", "AAC")
                             aacname = aacname.replace("dts", "aac")
+                            if args.aacstereo:
+                                aacname = aacname.replace("5.1", "Stereo")
                 
                 totaljobs = 4
                 jobnum = 1
@@ -440,9 +452,9 @@ def process(ford):
                 converttitle = "  Converting DTS to AC3 [" + str(jobnum) + "/" + str(totaljobs) + "]..."
                 jobnum += 1
                 audiochannels = 6
-                if args.aacstereo:
+                if args.stereo:
                     audiochannels = 2
-                convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "ac3", "-ac", audiochannels, "-ab", "448k", tempac3file]
+                convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "ac3", "-ac", str(audiochannels), "-ab", "448k", tempac3file]
                 runcommand(converttitle, convertcmd)
                 
                 if args.aac:
@@ -451,7 +463,7 @@ def process(ford):
                     audiochannels = 6
                     if args.aacstereo:
                         audiochannels = 2
-                    convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "aac", "-strict", "experimental", "-ac", audiochannels, "-ab", "448k", tempaacfile]
+                    convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "aac", "-strict", "experimental", "-ac", str(audiochannels), "-ab", "448k", tempaacfile]
                     runcommand(converttitle, convertcmd)
 
                 if args.external:
@@ -517,10 +529,16 @@ def process(ford):
                     remux.append("0:" + comp)
                     remux.append(tempac3file)
                     
-                    # Set track compression scheme and append new AC3
-                    remux.append("--compression")
-                    remux.append("0:" + comp)
-                    remux.append(tempaacfile)
+                    if args.aac:
+                        # If the name was set for the original DTS track set it for the AAC
+                        if aacname:
+                            remux.append("--track-name")
+                            remux.append("0:\"" + aacname.rstrip() + "\"")
+                            
+                        # Set track compression scheme and append new AAC
+                        remux.append("--compression")
+                        remux.append("0:" + comp)
+                        remux.append(tempaacfile)
                     
                     runcommand(remuxtitle, remux)  
 
@@ -529,7 +547,7 @@ def process(ford):
                         if args.new:
                             os.rename(tempnewmkvfile, adjacentmkvfile)
                         else:
-                            os.remove(ford)
+                            silentremove(ford)
                             os.rename(tempnewmkvfile, ford)
 
                 if not args.test:
@@ -538,11 +556,11 @@ def process(ford):
                         os.rename(tempdtsfile, os.path.join(dirName, fileBaseName + ".dts"))
                         fname = dtsfile
                     else:
-                        os.remove(tempdtsfile)
+                        silentremove(tempdtsfile)
                     if not args.external:
-                        os.remove(tempac3file)
-                        os.remove(tempaacfile)
-                    os.remove(temptcfile)
+                        silentremove(tempac3file)
+                        silentremove(tempaacfile)
+                        silentremove(temptcfile)
                     if not os.listdir(tempdir):
                         os.rmdir(tempdir)
 
@@ -576,10 +594,10 @@ for a in args.fileordir:
                 if args.md5 and (find_mount_point(dirName) != find_mount_point(destdir)):
                     if os.path.exists(destfile):
                         if args.overwrite:
-                            os.remove(destfile)
+                            silentremove(destfile)
                             shutil.copyfile(origfile, destfile)
                             if getmd5(origfile) == getmd5(destfile):
-                                os.remove(origfile)
+                                silentremove(origfile)
                             else:
                                 print "MD5's don't match."
                         else:
@@ -588,13 +606,13 @@ for a in args.fileordir:
                         doprint("copying: " + origfile + " --> " + destfile + "\n", 3)
                         shutil.copyfile(origfile, destfile)
                         if getmd5(origfile) == getmd5(destfile):
-                            os.remove(origfile)
+                            silentremove(origfile)
                         else:
                             print "MD5's don't match."
                 else:  
                     if os.path.exists(destfile):
                         if args.overwrite:
-                            os.remove(destfile)
+                            silentremove(destfile)
                             os.rename(origfile, destfile)
                         else:
                             print "File " + destfile + " already exists"

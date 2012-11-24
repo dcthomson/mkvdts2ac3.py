@@ -102,7 +102,7 @@ optional arguments:
                         also output the command output
   -V, --version         Print script version information
   --test                Print commands only, execute nothing
-  --debug               Print commands and pause before executing each
+  --debug               Print commands and pause before executing eachf;'
 </pre>
 
 
