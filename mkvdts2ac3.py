@@ -465,13 +465,14 @@ def process(ford):
                         audiochannels = 2
                     convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "libfaac", "-ac", str(audiochannels), "-ab", "448k", tempaacfile]
                     runcommand(converttitle, convertcmd)
-                    if not os.path.isfile(tempaacfile):
+                    if not os.path.isfile(tempaacfile) or os.path.getsize(tempaacfile) == 0:
                         convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "libvo_aacenc", "-ac", str(audiochannels), "-ab", "448k", tempaacfile]
                         runcommand(converttitle, convertcmd)
-                    if not os.path.isfile(tempaacfile):
+                    if not os.path.isfile(tempaacfile) or os.path.getsize(tempaacfile) == 0:
                         convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "aac", "-strict", "experimental", "-ac", str(audiochannels), "-ab", "448k", tempaacfile]
                         runcommand(converttitle, convertcmd)
-                    if os.path.isfile(tempaacfile):
+                    if not os.path.isfile(tempaacfile) or os.path.getsize(tempaacfile) == 0:
+                        args.aac = False
                         print "ERROR: ffmpeg can't use any aac codecs. Please try to get libfaac, libvo_aacenc, or a newer version of ffmpeg with the experimental aac codec installed"
                         
                 if args.external:
@@ -490,11 +491,6 @@ def process(ford):
                         remux.append("--track-order")
                         remux.append("1:0,0:1")
 
-                        
-                    # Declare output file
-                    remux.append("-o")
-                    remux.append(tempnewmkvfile)
-                    
                     # If user doesn't want the original DTS track drop it
                     comp = args.compress
                     if args.nodts or args.keepdts:
@@ -547,6 +543,10 @@ def process(ford):
                         remux.append("--compression")
                         remux.append("0:" + comp)
                         remux.append(tempaacfile)
+                    
+                    # Declare output file
+                    remux.append("-o")
+                    remux.append(tempnewmkvfile)
                     
                     runcommand(remuxtitle, remux)  
 
