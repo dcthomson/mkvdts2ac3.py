@@ -45,10 +45,11 @@ Usage
 =====
 
 <pre>
-usage: mkvdts2ac3.py [-h] [--aac] [--aacstereo] [-c TITLE] [-d]
-                     [--destdir DIRECTORY] [-e] [-f] [--ffmpegpath DIRECTORY]
-                     [-i] [-k] [--md5] [--mkvtoolnixpath DIRECTORY] [-n]
-                     [--new] [-o] [-r] [-s MODE] [--sabdestdir DIRECTORY]
+usage: mkvdts2ac3.py [-h] [--aac] [--aacstereo] [--aaccustom TITLE] [-c TITLE]
+                     [-d] [--destdir DIRECTORY] [-e] [-f]
+                     [--ffmpegpath DIRECTORY] [-i] [-k] [--md5]
+                     [--mkvtoolnixpath DIRECTORY] [-n] [--new] [-o] [-r]
+                     [-s MODE] [--sabdestdir DIRECTORY] [--stereo]
                      [-t TRACKID] [-w FOLDER] [-v] [-V] [--test] [--debug]
                      FileOrDirectory [FileOrDirectory ...]
 
@@ -61,6 +62,7 @@ optional arguments:
   -h, --help            show this help message and exit
   --aac                 Also add aac track
   --aacstereo           Make aac track stereo instead of 6 channel
+  --aaccustom TITLE     Custom AAC track title
   -c TITLE, --custom TITLE
                         Custom AC3 track title
   -d, --default         Mark AC3 track as default
@@ -88,6 +90,7 @@ optional arguments:
                         --compression)
   --sabdestdir DIRECTORY
                         SABnzbd Destination Directory
+  --stereo              Make ac3 track stereo instead of 6 channel
   -t TRACKID, --track TRACKID
                         Specify alternate DTS track. If it is not a DTS track
                         it will default to the first DTS track found

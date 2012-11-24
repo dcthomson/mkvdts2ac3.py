@@ -59,6 +59,7 @@ parser.add_argument('fileordir', metavar='FileOrDirectory', nargs='+', help='a f
 
 parser.add_argument("--aac", help="Also add aac track", action="store_true")
 parser.add_argument("--aacstereo", help="Make aac track stereo instead of 6 channel", action="store_true")
+parser.add_argument("--aaccustom", metavar="TITLE", help="Custom AAC track title")
 parser.add_argument("-c", "--custom", metavar="TITLE", help="Custom AC3 track title")
 parser.add_argument("-d", "--default", help="Mark AC3 track as default", action="store_true")
 parser.add_argument("--destdir", metavar="DIRECTORY", help="Destination Directory")
@@ -76,6 +77,7 @@ parser.add_argument("-o", "--overwrite", help="Overwrite file if already there. 
 parser.add_argument("-r", "--recursive", help="Recursively descend into directories", action="store_true")
 parser.add_argument("-s", "--compress", metavar="MODE", help="Apply header compression to streams (See mkvmerge's --compression)", default='none')
 parser.add_argument("--sabdestdir", metavar="DIRECTORY", help="SABnzbd Destination Directory")
+parser.add_argument("--stereo", help="Make ac3 track stereo instead of 6 channel", action="store_true")
 parser.add_argument("-t", "--track", metavar="TRACKID", help="Specify alternate DTS track. If it is not a DTS track it will default to the first DTS track found")
 parser.add_argument("-w", "--wd", metavar="FOLDER", help="Specify alternate temporary working directory")
 parser.add_argument("-v", "--verbose", help="Turn on verbose output. Use more v's for more verbosity. -v will output what it is doing. -vv will also output the command that it is running. -vvv will also output the command output", action="count", default=0)
@@ -385,16 +387,27 @@ def process(ford):
                     if "Language" in line:
                         dtslang = line.split()[-1]
                 
-                # get dts name
-                dtsname = False
+                # get ac3 track name
+                ac3name = False
                 if args.custom:
-                    dtsname = args.custom
+                    ac3name = args.custom
                 else:
                     for line in dtstrackinfo:
                         if "+ Name: " in line:
-                            dtsname = line.split("+ Name: ")[-1]
-                            dtsname = dtsname.replace("DTS", "AC3")
-                            dtsname = dtsname.replace("dts", "ac3")
+                            ac3name = line.split("+ Name: ")[-1]
+                            ac3name = ac3name.replace("DTS", "AC3")
+                            ac3name = ac3name.replace("dts", "ac3")
+                
+                # get aac track name
+                aacname = False
+                if args.aaccustom:
+                    aacname = args.aaccustom
+                else:
+                    for line in dtstrackinfo:
+                        if "+ Name: " in line:
+                            aacname = line.split("+ Name: ")[-1]
+                            aacname = aacname.replace("DTS", "AAC")
+                            aacname = aacname.replace("dts", "aac")
                 
                 totaljobs = 4
                 jobnum = 1
@@ -426,7 +439,10 @@ def process(ford):
                 # convert DTS to AC3
                 converttitle = "  Converting DTS to AC3 [" + str(jobnum) + "/" + str(totaljobs) + "]..."
                 jobnum += 1
-                convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "ac3", "-ac", "6", "-ab", "448k", tempac3file]
+                audiochannels = 6
+                if args.aacstereo:
+                    audiochannels = 2
+                convertcmd = [ffmpeg, "-y", "-i", tempdtsfile, "-acodec", "ac3", "-ac", audiochannels, "-ab", "448k", tempac3file]
                 runcommand(converttitle, convertcmd)
                 
                 if args.aac:
@@ -487,9 +503,9 @@ def process(ford):
                     remux.append("0:" + dtslang)
                     
                     # If the name was set for the original DTS track set it for the AC3
-                    if dtsname:
+                    if ac3name:
                         remux.append("--track-name")
-                        remux.append("0:\"" + dtsname.rstrip() + "\"")
+                        remux.append("0:\"" + ac3name.rstrip() + "\"")
                     
                     # set delay if there is any
                     if delay:
