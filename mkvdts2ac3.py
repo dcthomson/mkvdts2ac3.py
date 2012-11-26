@@ -71,6 +71,7 @@ parser.add_argument("--ffmpegpath", metavar="DIRECTORY", help="Path of ffmpeg")
 parser.add_argument("-i", "--initial", help="New AC3 track will be first in the file", action="store_true")
 parser.add_argument("-k", "--keepdts", help="Keep external DTS track (implies '-n')", action="store_true")
 parser.add_argument("--md5", help="check md5 of files before removing the original if destination directory is on a different device than the original file", action="store_true")
+parser.add_argument("--mp4", help="create output in mp4 format", action="store_true")
 parser.add_argument("--mkvtoolnixpath", metavar="DIRECTORY", help="Path of mkvextract, mkvinfo and mkvmerge")
 parser.add_argument("-n", "--nodts", help="Do not retain the DTS track", action="store_true")
 parser.add_argument("--new", help="Do not copy over original. Create new adjacent file", action="store_true")
@@ -332,6 +333,7 @@ def process(ford):
             newmkvfile = fileBaseName + '.mkv'
             tempnewmkvfile = os.path.join(tempdir, newmkvfile)
             adjacentmkvfile = os.path.join(dirName, fileBaseName + '.new.mkv')
+            mp4file = os.path.join(dirName, fileBaseName + '.mp4')
             fname = fileName
             
             # get dts track id and video track id
@@ -425,6 +427,8 @@ def process(ford):
                 jobnum = 1
                 if args.aac:
                     totaljobs += 1 
+                if args.mp4:
+                    totaljobs += 1
                 
                 # extract timecodes
                 tctitle = "  Extracting Timecodes  [" + str(jobnum) + "/" + str(totaljobs) + "]..."
@@ -554,12 +558,18 @@ def process(ford):
                     runcommand(remuxtitle, remux)  
 
                     if not args.test:
-                        #~ replace old mkv with new mkv
-                        if args.new:
-                            os.rename(tempnewmkvfile, adjacentmkvfile)
-                        else:
+                        if args.mp4:
+                            converttitle = "  Converting MKV to MP4 [" + str(jobnum) + "/" + str(totaljobs) + "]..."
+                            convertcmd = [ffmpeg, "-i", tempnewmkvfile, "-map", "0", "-vcodec", "copy", "-acodec", "copy", "-c:s", "mov_text", mp4file]
+                            runcommand(converttitle, convertcmd)
                             silentremove(ford)
-                            os.rename(tempnewmkvfile, ford)
+                        else:
+                            #~ replace old mkv with new mkv
+                            if args.new:
+                                os.rename(tempnewmkvfile, adjacentmkvfile)
+                            else:
+                                silentremove(ford)
+                                os.rename(tempnewmkvfile, ford)
 
                 if not args.test:
                     #~ clean up temp folder

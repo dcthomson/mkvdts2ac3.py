@@ -47,7 +47,7 @@ Usage
 <pre>
 usage: mkvdts2ac3.py [-h] [--aac] [--aacstereo] [--aaccustom TITLE] [-c TITLE]
                      [-d] [--destdir DIRECTORY] [-e] [-f]
-                     [--ffmpegpath DIRECTORY] [-i] [-k] [--md5]
+                     [--ffmpegpath DIRECTORY] [-i] [-k] [--md5] [--mp4]
                      [--mkvtoolnixpath DIRECTORY] [-n] [--new] [-o] [-r]
                      [-s MODE] [--sabdestdir DIRECTORY] [--stereo]
                      [-t TRACKID] [-w FOLDER] [-v] [-V] [--test] [--debug]
@@ -78,6 +78,7 @@ optional arguments:
   --md5                 check md5 of files before removing the original if
                         destination directory is on a different device than
                         the original file
+  --mp4                 create output in mp4 format
   --mkvtoolnixpath DIRECTORY
                         Path of mkvextract, mkvinfo and mkvmerge
   -n, --nodts           Do not retain the DTS track
@@ -102,7 +103,7 @@ optional arguments:
                         also output the command output
   -V, --version         Print script version information
   --test                Print commands only, execute nothing
-  --debug               Print commands and pause before executing eachf;'
+  --debug               Print commands and pause before executing each
 </pre>
 
 
