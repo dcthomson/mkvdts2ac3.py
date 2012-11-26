@@ -489,7 +489,10 @@ def process(ford):
                     # Puts the AC3 track as the second in the file if indicated as initial
                     if args.initial:
                         remux.append("--track-order")
-                        remux.append("1:0,0:1")
+                        if args.aac:
+                            remux.append("1:0,2:0")
+                        else:
+                            remux.append("1:0")
 
                     # If user doesn't want the original DTS track drop it
                     comp = args.compress
