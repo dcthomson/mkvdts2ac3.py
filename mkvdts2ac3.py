@@ -481,7 +481,7 @@ def process(ford):
                         
                 if args.external:
                     if not args.test:
-                        os.rename(tempac3file, os.path.join(dirName, fileBaseName + '.ac3'))
+                        shutil.move(tempac3file, os.path.join(dirName, fileBaseName + '.ac3'))
                         fname = ac3file
                 else:
                     # remux
@@ -566,15 +566,15 @@ def process(ford):
                         else:
                             #~ replace old mkv with new mkv
                             if args.new:
-                                os.rename(tempnewmkvfile, adjacentmkvfile)
+                                shutil.move(tempnewmkvfile, adjacentmkvfile)
                             else:
                                 silentremove(ford)
-                                os.rename(tempnewmkvfile, ford)
+                                shutil.move(tempnewmkvfile, ford)
 
                 if not args.test:
                     #~ clean up temp folder
                     if args.keepdts and not args.external:
-                        os.rename(tempdtsfile, os.path.join(dirName, fileBaseName + ".dts"))
+                        shutil.move(tempdtsfile, os.path.join(dirName, fileBaseName + ".dts"))
                         fname = dtsfile
                     else:
                         silentremove(tempdtsfile)
@@ -634,11 +634,11 @@ for a in args.fileordir:
                     if os.path.exists(destfile):
                         if args.overwrite:
                             silentremove(destfile)
-                            os.rename(origfile, destfile)
+                            shutil.move(origfile, destfile)
                         else:
                             print "File " + destfile + " already exists"
                     else:
-                        os.rename(origfile, destfile)
+                        shutil.move(origfile, destfile)
             else:
                 origpath = os.path.abspath(ford)
                 destpath = os.path.join(destdir, os.path.basename(os.path.normpath(ford)))
