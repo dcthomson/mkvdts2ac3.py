@@ -48,9 +48,10 @@ Usage
 usage: mkvdts2ac3.py [-h] [--aac] [--aacstereo] [--aaccustom TITLE] [-c TITLE]
                      [-d] [--destdir DIRECTORY] [-e] [-f]
                      [--ffmpegpath DIRECTORY] [-i] [-k] [--md5] [--mp4]
-                     [--mkvtoolnixpath DIRECTORY] [-n] [--new] [-o] [-r]
-                     [-s MODE] [--sabdestdir DIRECTORY] [--stereo]
-                     [-t TRACKID] [-w FOLDER] [-v] [-V] [--test] [--debug]
+                     [--mkvtoolnixpath DIRECTORY] [-n] [--new]
+                     [--no-subtitles] [-o] [-r] [-s MODE]
+                     [--sabdestdir DIRECTORY] [--stereo] [-t TRACKID]
+                     [-w FOLDER] [-v] [-V] [--test] [--debug]
                      FileOrDirectory [FileOrDirectory ...]
 
 convert matroska (.mkv) video files audio portion from dts to ac3
@@ -74,15 +75,16 @@ optional arguments:
   --ffmpegpath DIRECTORY
                         Path of ffmpeg
   -i, --initial         New AC3 track will be first in the file
-  -k, --keepdts         Keep external DTS track (implies '-n')
+  -k, --keep-dts        Keep external DTS track (implies '-n')
   --md5                 check md5 of files before removing the original if
                         destination directory is on a different device than
                         the original file
   --mp4                 create output in mp4 format
   --mkvtoolnixpath DIRECTORY
                         Path of mkvextract, mkvinfo and mkvmerge
-  -n, --nodts           Do not retain the DTS track
+  -n, --no-dts          Do not retain the DTS track
   --new                 Do not copy over original. Create new adjacent file
+  --no-subtitles        Remove subtitles
   -o, --overwrite       Overwrite file if already there. This only applies if
                         destdir or sabdestdir is set
   -r, --recursive       Recursively descend into directories
