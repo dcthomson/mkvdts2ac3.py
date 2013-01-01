@@ -160,14 +160,14 @@ f.write(subprocess.check_output(["mkvinfo", testfile]))
 f.close()
 print "DONE"
 
-# keep-dts
-test = "keep-dts"
+# keepdts
+test = "keepdts"
 sys.stdout.write('Running test "' + test + '"...')
 testdir = os.path.join("tests", test)
 os.makedirs(testdir)
 testfile = os.path.join(testdir, "test.mkv")
 shutil.copyfile("test.mkv", testfile)
-cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--keep-dts", testfile]
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--keepdts", testfile]
 output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
 outfile = os.path.join(testdir, "output.txt")
 f = open(outfile, "w")
@@ -233,14 +233,14 @@ f.write(output)
 f.close()
 print "DONE"
 
-# no-dts
-test = "no-dts"
+# nodts
+test = "nodts"
 sys.stdout.write('Running test "' + test + '"...')
 testdir = os.path.join("tests", test)
 os.makedirs(testdir)
 testfile = os.path.join(testdir, "test.mkv")
 shutil.copyfile("test.mkv", testfile)
-cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--no-dts", testfile]
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--nodts", testfile]
 output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
 outfile = os.path.join(testdir, "output.txt")
 f = open(outfile, "w")

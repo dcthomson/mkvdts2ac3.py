@@ -75,14 +75,14 @@ optional arguments:
   --ffmpegpath DIRECTORY
                         Path of ffmpeg
   -i, --initial         New AC3 track will be first in the file
-  -k, --keep-dts        Keep external DTS track (implies '-n')
+  -k, --keepdts         Keep external DTS track (implies '-n')
   --md5                 check md5 of files before removing the original if
                         destination directory is on a different device than
                         the original file
   --mp4                 create output in mp4 format
   --mkvtoolnixpath DIRECTORY
                         Path of mkvextract, mkvinfo and mkvmerge
-  -n, --no-dts          Do not retain the DTS track
+  -n, --nodts           Do not retain the DTS track
   --new                 Do not copy over original. Create new adjacent file
   --no-subtitles        Remove subtitles
   -o, --overwrite       Overwrite file if already there. This only applies if

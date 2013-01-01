@@ -69,11 +69,11 @@ parser.add_argument("-e", "--external", action="store_true",
 parser.add_argument("-f", "--force", help="Force processing when AC3 track is detected", action="store_true")
 parser.add_argument("--ffmpegpath", metavar="DIRECTORY", help="Path of ffmpeg")
 parser.add_argument("-i", "--initial", help="New AC3 track will be first in the file", action="store_true")
-parser.add_argument("-k", "--keep-dts", help="Keep external DTS track (implies '-n')", action="store_true")
+parser.add_argument("-k", "--keepdts", help="Keep external DTS track (implies '-n')", action="store_true")
 parser.add_argument("--md5", help="check md5 of files before removing the original if destination directory is on a different device than the original file", action="store_true")
 parser.add_argument("--mp4", help="create output in mp4 format", action="store_true")
 parser.add_argument("--mkvtoolnixpath", metavar="DIRECTORY", help="Path of mkvextract, mkvinfo and mkvmerge")
-parser.add_argument("-n", "--no-dts", help="Do not retain the DTS track", action="store_true")
+parser.add_argument("-n", "--nodts", help="Do not retain the DTS track", action="store_true")
 parser.add_argument("--new", help="Do not copy over original. Create new adjacent file", action="store_true")
 parser.add_argument("--no-subtitles", help="Remove subtitles", action="store_true")
 parser.add_argument("-o", "--overwrite", help="Overwrite file if already there. This only applies if destdir or sabdestdir is set", action="store_true")
@@ -505,7 +505,7 @@ def process(ford):
 
                     # If user doesn't want the original DTS track drop it
                     comp = args.compress
-                    if args.no_dts or args.keep_dts:
+                    if args.nodts or args.keepdts:
                         if len(audiotracks) == 1:
                             remux.append("-A")
                         else:
@@ -578,7 +578,7 @@ def process(ford):
 
                 if not args.test:
                     #~ clean up temp folder
-                    if args.keep_dts and not args.external:
+                    if args.keepdts and not args.external:
                         shutil.move(tempdtsfile, os.path.join(dirName, fileBaseName + ".dts"))
                         fname = dtsfile
                     else:
