@@ -271,6 +271,25 @@ f.write(output)
 f.close()
 print "DONE"
 
+# no_subtitles
+test = "no_subtitles"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "test.mkv")
+shutil.copyfile("test.mkv", testfile)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--no-subtitles", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+mkvinfo = os.path.join(testdir, "mkvinfo.txt")
+f = open(mkvinfo, "w")
+f.write(subprocess.check_output(["mkvinfo", testfile]))
+f.close()
+print "DONE"
+
 # recursive
 test = "recursive"
 sys.stdout.write('Running test "' + test + '"...')

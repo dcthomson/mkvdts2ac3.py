@@ -53,6 +53,7 @@ if os.path.isfile(configFilename):
     for key in defaults:
         if key == "verbose":
             defaults["verbose"] = int(defaults["verbose"])
+
     
     parser.set_defaults(**defaults)
 
