@@ -91,11 +91,19 @@ parser.add_argument("--debug", help="Print commands and pause before executing e
 
 args = parser.parse_args()
 
+def winexe(program):
+    if sys.platform == "win32" and not program.endswith(".exe"):
+        program += ".exe"
+    return program
+
 # set ffmpeg and mkvtoolnix paths
 if args.mkvtoolnixpath:
     mkvinfo = os.path.join(args.mkvtoolnixpath, "mkvinfo")
+    mkvinfo = winexe(mkvinfo)
     mkvmerge = os.path.join(args.mkvtoolnixpath, "mkvmerge")
+    mkvmerge = winexe(mkvmerge)
     mkvextract = os.path.join(args.mkvtoolnixpath, "mkvextract")
+    mkvextract = winexe(mkvextract)
 if not args.mkvtoolnixpath or not os.path.exists(mkvinfo):
     mkvinfo = "mkvinfo"
 if not args.mkvtoolnixpath or not os.path.exists(mkvmerge):
@@ -105,8 +113,10 @@ if not args.mkvtoolnixpath or not os.path.exists(mkvextract):
     
 if args.ffmpegpath:
     ffmpeg = os.path.join(args.ffmpegpath, "ffmpeg")
+    ffmpeg = winexe(ffmpeg)
 if not args.ffmpegpath or not os.path.exists(ffmpeg):
     ffmpeg = "ffmpeg"
+
 
 # check paths
 def which(program):
