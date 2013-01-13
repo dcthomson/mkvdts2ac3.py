@@ -54,7 +54,6 @@ if os.path.isfile(configFilename):
         if key == "verbose":
             defaults["verbose"] = int(defaults["verbose"])
 
-    
     parser.set_defaults(**defaults)
 
 parser.add_argument('fileordir', metavar='FileOrDirectory', nargs='+', help='a file or directory (wildcards may be used)')
@@ -84,12 +83,15 @@ parser.add_argument("--sabdestdir", metavar="DIRECTORY", help="SABnzbd Destinati
 parser.add_argument("--stereo", help="Make ac3 track stereo instead of 6 channel", action="store_true")
 parser.add_argument("-t", "--track", metavar="TRACKID", help="Specify alternate DTS track. If it is not a DTS track it will default to the first DTS track found")
 parser.add_argument("-w", "--wd", metavar="FOLDER", help="Specify alternate temporary working directory")
-parser.add_argument("-v", "--verbose", help="Turn on verbose output. Use more v's for more verbosity. -v will output what it is doing. -vv will also output the command that it is running. -vvv will also output the command output", action="count", default=0)
+parser.add_argument("-v", "--verbose", help="Turn on verbose output. Use more v's for more verbosity. -v will output what it is doing. -vv will also output the command that it is running. -vvv will also output the command output", action="count")
 parser.add_argument("-V", "--version", help="Print script version information", action='version', version='%(prog)s ' + version + ' by Drew Thomson')
 parser.add_argument("--test", help="Print commands only, execute nothing", action="store_true")
 parser.add_argument("--debug", help="Print commands and pause before executing each", action="store_true")
 
 args = parser.parse_args()
+
+if not args.verbose:
+    args.verbose = 0
 
 def winexe(program):
     if sys.platform == "win32" and not program.endswith(".exe"):
