@@ -5,8 +5,8 @@ of options for controlling the resulting file.
 A recreation of mkvdts2ac3.sh which was created by Jake Wharton and Chris Hoekstra.
 I figured that most people are using this with sabnzbd which requires python so a
 non-os specific solution would help people out (as well as myself). There are a
-few extras I have added such as, sabnzbd support, recursively decending directories,
-and overwrite mode.
+few extras I have added such as, sabnzbd support, nzbget support, recursively decending
+directories, and overwrite mode.
 
 Installation
 ============
@@ -158,10 +158,37 @@ Here is an example of how to set up with SABnzbd
 If you are using something with a renamer / sorter such as Couch Potato set the Folder/Path to any folder you want the downloaded files to be put in while the conversion is being done. Then set the #sabdestdir in the mkvdts2ac3.cfg to the directory that Couch Potato looks for completed downloads.
 
 
+NZBGet
+------
+If you do not already have a postprocessing script directory for nzbget:
+
+1. Create the directory on your filesystem (usually 'nzbget MainDir'/ppscripts)
+
+2. Set the path in the web frontend: Settings -> PATHS -> ScriptDir (usually ${MainDir}/ppscripts)
+
+3. Click "Save all Changes" button at the bottom of the page
+
+Now add mkvdts2ac3.py into nzbget
+
+1. Copy mkvdts2ac3.py into your nzbget postprocessing scripts directory
+
+2. Then reload nzbget (Settings -> SYSTEM -> Reload)
+
+3. Then under settings go to POST-PROCESSING SCRIPTS and add mkvdts2ac3.py to DefScript
+
+4. Click "Save all Changes" button at the bottom of the page
+
+5. Reload nzbget again (Settings -> SYSTEM -> Reload)
+
+That's it.
+
+    ###Defaults
+Now under Settings there should be a MKVDTS2AC3.py menu item. You can change the defaults there if needed.
+
   
 Developed By
 ============
-* Drew Thomson - <drewthomson at outlook dot com>
+* Drew Thomson - <drooby at gmail dot com>
 
 Git repository located at
 [github.com/dcthomson/mkvdts2ac3.py](http://github.com/dcthomson/mkvdts2ac3.py)
