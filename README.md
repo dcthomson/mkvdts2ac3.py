@@ -180,10 +180,8 @@ Now add mkvdts2ac3.py into nzbget
 
 5. Reload nzbget again (Settings -> SYSTEM -> Reload)
 
-That's it.
-
     ###Defaults
-Now under Settings there should be a MKVDTS2AC3.py menu item. You can change the defaults there if needed.
+Now under Settings there should be a MKVDTS2AC3.PY menu item. You can change the defaults there if needed.
 
   
 Developed By
