@@ -172,9 +172,9 @@ Now add mkvdts2ac3.py into nzbget
 
 1. Copy mkvdts2ac3.py into your nzbget postprocessing scripts directory
 
-2. Then reload nzbget (Settings -> SYSTEM -> Reload)
+2. Reload nzbget (Settings -> SYSTEM -> Reload)
 
-3. Then under settings go to POST-PROCESSING SCRIPTS and add mkvdts2ac3.py to DefScript
+3. Under settings go to POST-PROCESSING SCRIPTS and add mkvdts2ac3.py to DefScript
 
 4. Click "Save all Changes" button at the bottom of the page
 
