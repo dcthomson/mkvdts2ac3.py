@@ -184,11 +184,6 @@ if os.environ.has_key('NZBOP_SCRIPTDIR') and not os.environ['NZBOP_VERSION'][0:5
     
     args.fileordir = [os.environ['NZBPP_DIRECTORY']]
     
-    print("os.environ: %s" % os.environ['NZBPP_DIRECTORY'])
-    dirs = os.listdir( os.environ['NZBPP_DIRECTORY'] )
-    for f in dirs:
-        print("  file: %s" % f)
-    
     if not 'NZBPO_AAC' in os.environ:
         raise Exception("mkvdts2ac3.py settings not saved")
         sys.exit(POSTPROCESS_ERROR)
