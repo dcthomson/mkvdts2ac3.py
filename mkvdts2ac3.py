@@ -789,7 +789,7 @@ def process(ford):
                     # If user wants new AC3 as default then add appropriate arguments to command
                     if args.default:
                         remux.append("--default-track")
-                        remux.append("0:0")
+                        remux.append("0:1")
                    
                     # Set the language
                     remux.append("--language")
