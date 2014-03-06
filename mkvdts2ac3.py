@@ -629,8 +629,8 @@ def process(ford):
                 dtstracks[:] = []
                 dtstracks.append(altdtstrackid)
            
-            if not dtstrackid:
-                doprint("  No DTS track found\n", 1)
+            if not dtstracks:
+                doprint("  No DTS tracks found\n", 1)
             elif alreadygotac3 and not args.force:
                 doprint("  Already has AC3 track\n", 1)
             else:
