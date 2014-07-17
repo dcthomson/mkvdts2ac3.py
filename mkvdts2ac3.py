@@ -640,7 +640,7 @@ def process(ford):
                     dtstracks = dtstracks[0:1]
                 for dtstrackid in dtstracks:
                     # get dtstrack info
-                    output = subprocess.check_output([mkvinfo, ford])
+                    output = subprocess.check_output([mkvinfo, "--ui-language", "en_US", ford])
                     lines = output.split("\n")
                     dtstrackinfo = []
                     startcount = 0
