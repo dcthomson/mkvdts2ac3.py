@@ -623,7 +623,7 @@ def process(ford):
                 elif ' audio (A_AC3)' in line or ' audio (AC3' in line:
                     alreadygotac3 = True
                 if args.track:
-                    matchObj = re.match( r'Track ID ' + args.track + r': audio (A?_?DTS', line)
+                    matchObj = re.match( r'Track ID ' + args.track + r': audio \(A?_?DTS', line)
                     if matchObj:
                         altdtstrackid = args.track
             if altdtstrackid:
