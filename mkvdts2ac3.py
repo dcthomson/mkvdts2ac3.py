@@ -614,17 +614,16 @@ def process(ford):
                     trackid = linelist[2]
                     linelist = trackid.split(':')
                     trackid = linelist[0]
-                if 'audio (A_' in line:
+                if ' audio (' in line:
                     audiotracks.append(trackid)
-                matchObj = re.match( r': audio (A?_?DTS)', line)
-                if matchObj:
+                if ' audio (A_DTS)' in line or ' audio (DTS' in line:
                     dtstracks.append(trackid)
-                elif 'video (V_' in line:
+                elif ' video (' in line:
                     videotrackid = trackid
-                elif ': audio (A_AC3)' in line:
+                elif ' audio (A_AC3)' in line or ' audio (AC3' in line:
                     alreadygotac3 = True
                 if args.track:
-                    matchObj = re.match( r'Track ID ' + args.track + r': audio (A?_?DTS)', line)
+                    matchObj = re.match( r'Track ID ' + args.track + r': audio (A?_?DTS', line)
                     if matchObj:
                         altdtstrackid = args.track
             if altdtstrackid:
