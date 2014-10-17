@@ -78,6 +78,9 @@
 # Specify alternate DTS track. If it is not a DTS track it will default to the first DTS track found
 #track=
 
+# Process all the DTS tracks.
+#all_tracks=False
+
 # Specify alternate temporary working directory
 #wd=
 
@@ -268,7 +271,12 @@ if os.environ.has_key('NZBOP_SCRIPTDIR') and not os.environ['NZBOP_VERSION'][0:5
         args.stereo = True
 
     args.track = os.environ['NZBPO_TRACK']
-    
+
+    if os.environ['NZBPO_ALL_TRACKS'] == 'False':
+        args.all_tracks = False
+    else:
+        args.all_tracks = True
+
     args.wd = os.environ['NZBPO_WD']
     
     if os.environ['NZBPO_MPFOUR'] == 'False':
@@ -331,6 +339,7 @@ else:
     parser.add_argument("--sabdestdir", metavar="DIRECTORY", help="SABnzbd Destination Directory")
     parser.add_argument("--stereo", help="Make ac3 track stereo instead of 6 channel", action="store_true")
     parser.add_argument("-t", "--track", metavar="TRACKID", help="Specify alternate DTS track. If it is not a DTS track it will default to the first DTS track found")
+    parser.add_argument("--all-tracks", help="Convert all DTS tracks", action="store_true");
     parser.add_argument("-w", "--wd", metavar="FOLDER", help="Specify alternate temporary working directory")
     parser.add_argument("-v", "--verbose", help="Turn on verbose output. Use more v's for more verbosity. -v will output what it is doing. -vv will also output the command that it is running. -vvv will also output the command output", action="count")
     parser.add_argument("-V", "--version", help="Print script version information", action='version', version='%(prog)s ' + version + ' by Drew Thomson')
@@ -584,20 +593,14 @@ def process(ford):
             fileBaseName = os.path.splitext(fileName)[0]
            
             doprint("filename: " + fileName + "\n", 1)
-           
-            dtsfile = fileBaseName + '.dts'
-            tempdtsfile = os.path.join(tempdir, dtsfile)
-            ac3file = fileBaseName + '.ac3'
-            tempac3file = os.path.join(tempdir, ac3file)
-            aacfile = fileBaseName + '.aac'
-            tempaacfile = os.path.join(tempdir, aacfile)
-            tcfile = fileBaseName + '.tc'
-            temptcfile = os.path.join(tempdir, tcfile)
+
             newmkvfile = fileBaseName + '.mkv'
             tempnewmkvfile = os.path.join(tempdir, newmkvfile)
             adjacentmkvfile = os.path.join(dirName, fileBaseName + '.new.mkv')
             mp4file = os.path.join(dirName, fileBaseName + '.mp4')
-            fname = fileName
+            files = []
+            if not args.external and not args.mp4:
+                files.append(fileName)
            
             # get dts track id and video track id
             output = subprocess.check_output([mkvmerge, "-i", ford])
@@ -635,10 +638,33 @@ def process(ford):
             elif alreadygotac3 and not args.force:
                 doprint("  Already has AC3 track\n", 1)
             else:
-                # if args.force = True we process all DTS tracks, otherwise only the first one
-                if not args.force:
+                if not args.all_tracks:
                     dtstracks = dtstracks[0:1]
+
+                # 3 jobs per DTS track (Extract DTS, Extract timecodes, Transcode)
+                totaljobs = (3 * len(dtstracks))
+                # 1 Remux+ 1
+                if not args.external:
+                    totaljobs += 1
+                if args.aac:
+                    # 1 extra transcode per DTS track
+                    totaljobs += len(dtstracks)
+                if args.mp4:
+                    # Convert mkv -> mp4
+                    totaljobs += 1
+                jobnum = 1
+
+                dtsinfo = dict()
                 for dtstrackid in dtstracks:
+                    dtsfile = fileBaseName + dtstrackid + '.dts'
+                    tempdtsfile = os.path.join(tempdir, dtsfile)
+                    ac3file = fileBaseName + dtstrackid + '.ac3'
+                    tempac3file = os.path.join(tempdir, ac3file)
+                    aacfile = fileBaseName + dtstrackid + '.aac'
+                    tempaacfile = os.path.join(tempdir, aacfile)
+                    tcfile = fileBaseName + dtstrackid + '.tc'
+                    temptcfile = os.path.join(tempdir, tcfile)
+
                     # get dtstrack info
                     output = subprocess.check_output([mkvinfo, "--ui-language", "en_US", ford])
                     lines = output.split("\n")
@@ -691,13 +717,6 @@ def process(ford):
                                 aacname = aacname.replace("dts", "aac")
                                 if args.aacstereo:
                                     aacname = aacname.replace("5.1", "Stereo")
-                   
-                    totaljobs = 4
-                    jobnum = 1
-                    if args.aac:
-                        totaljobs += 1
-                    if args.mp4:
-                        totaljobs += 1
 
                     # extract timecodes
                     tctitle = "  Extracting Timecodes  [" + str(jobnum) + "/" + str(totaljobs) + "]..."
@@ -747,121 +766,154 @@ def process(ford):
                         if not os.path.isfile(tempaacfile) or os.path.getsize(tempaacfile) == 0:
                             args.aac = False
                             print "ERROR: ffmpeg can't use any aac codecs. Please try to get libfaac, libvo_aacenc, or a newer version of ffmpeg with the experimental aac codec installed"
-                           
+
+                    # Save information about current DTS track
+                    dtsinfo[dtstrackid] = {
+                      'dtsfile': tempdtsfile,
+                      'ac3file': tempac3file,
+                      'aacfile': tempaacfile,
+                      'tcfile': temptcfile,
+                      'lang': dtslang,
+                      'ac3name': ac3name,
+                      'aacname': aacname,
+                      'delay': delay
+                    }
+
                     if args.external:
                         if not args.test:
-                            shutil.move(tempac3file, os.path.join(dirName, fileBaseName + '.ac3'))
-                            fname = ac3file
-                    else:
-                        # remux
-                        remuxtitle = "  Remuxing AC3 into MKV [" + str(jobnum) + "/" + str(totaljobs) + "]..."
-                        jobnum += 1
-                        # Start to "build" command
-                        remux = [mkvmerge]
-                        
-                        comp = 'none'
-                        if args.compress:
-                            comp = args.compress
-                            
-                        # Remove subtitles
-                        if args.no_subtitles:
-                            remux.append("--no-subtitles")
-                       
-                        # Puts the AC3 track as the second in the file if indicated as initial
-                        if args.initial:
-                            remux.append("--track-order")
+                            trackIdentifier = ''
+                            if args.all_tracks and len(dtstracks) > 1:
+                                trackIdentifier = '_' + dtstrackid
+                            outputac3file = fileBaseName + trackIdentifier + '.ac3'
+                            shutil.move(tempac3file, os.path.join(dirName, outputac3file))
+                            files.append(outputac3file)
                             if args.aac:
-                                remux.append("1:0,2:0")
-                            else:
-                                remux.append("1:0")
+                                outputaacfile = fileBaseName + trackIdentifier + '.aac'
+                                shutil.move(tempaacfile, os.path.join(dirName, outputaacfile))
+                                files.append(outputaacfile)
 
-                        # If user doesn't want the original DTS track drop it
-                        if args.nodts or args.keepdts:
-                            if len(audiotracks) == 1:
-                                remux.append("-A")
-                            else:
-                                audiotracks = [audiotrack for audiotrack in audiotracks if audiotrack != dtstrackid]
-                                remux.append("-a")
-                                remux.append(",".join(audiotracks))
-                                for tid in audiotracks:
-                                    remux.append("--compression")
-                                    remux.append(tid + ":" + comp)
-                       
-                        # Add original MKV file, set header compression scheme         
-                        remux.append("--compression")
-                        remux.append(videotrackid + ":" + comp)
-                        remux.append(ford)
-                       
-                        # If user wants new AC3 as default then add appropriate arguments to command
-                        if args.default:
-                            remux.append("--default-track")
-                            remux.append("0:1")
-                       
+                if not args.external:
+                    # remux
+                    remuxtitle = "  Remuxing AC3 into MKV [" + str(jobnum) + "/" + str(totaljobs) + "]..."
+                    jobnum += 1
+                    # Start to "build" command
+                    remux = [mkvmerge]
+
+                    comp = 'none'
+                    if args.compress:
+                        comp = args.compress
+
+                    # Remove subtitles
+                    if args.no_subtitles:
+                        remux.append("--no-subtitles")
+
+                    # Change the default position of the AC3 track if requested
+                    if args.initial:
+                        remux.append("--track-order")
+                        tracklist = []
+                        totaltracks = len(dtstracks)
+                        if args.aac:
+                            totaltracks *= 2
+                        for trackid in range(1, int(totaltracks) + 1):
+                            tracklist.append('%d:0' % trackid)
+                        remux.append(','.join(tracklist))
+
+                    # If user doesn't want the original DTS track drop it
+                    if args.nodts or args.keepdts:
+                        audiotracks = [audiotrack for audiotrack in audiotracks if audiotrack not in dtstracks]
+                        if len(audiotracks) == 0:
+                            remux.append("--no-audio")
+                        else:
+                            remux.append("--audio-tracks")
+                            remux.append(",".join(audiotracks))
+                            for tid in audiotracks:
+                                remux.append("--compression")
+                                remux.append(tid + ":" + comp)
+
+                    # Add original MKV file, set header compression scheme
+                    remux.append("--compression")
+                    remux.append(videotrackid + ":" + comp)
+                    remux.append(ford)
+
+                    # If user wants new AC3 as default then add appropriate arguments to command
+                    if args.default:
+                        remux.append("--default-track")
+                        remux.append("0:1")
+
+                    # Add parameters for each DTS track processed
+                    for dtstrackid in dtstracks:
+
                         # Set the language
                         remux.append("--language")
-                        remux.append("0:" + dtslang)
-                       
+                        remux.append("0:" + dtsinfo[dtstrackid]['lang'])
+
                         # If the name was set for the original DTS track set it for the AC3
                         if ac3name:
                             remux.append("--track-name")
-                            remux.append("0:\"" + ac3name.rstrip() + "\"")
-                       
+                            remux.append("0:\"" + dtsinfo[dtstrackid]['ac3name'].rstrip() + "\"")
+
                         # set delay if there is any
                         if delay:
                             remux.append("--sync")
-                            remux.append("0:" + delay.rstrip())
-                           
+                            remux.append("0:" + dtsinfo[dtstrackid]['delay'].rstrip())
+
                         # Set track compression scheme and append new AC3
                         remux.append("--compression")
                         remux.append("0:" + comp)
-                        remux.append(tempac3file)
-                       
+                        remux.append(dtsinfo[dtstrackid]['ac3file'])
+
                         if args.aac:
                             # If the name was set for the original DTS track set it for the AAC
                             if aacname:
                                 remux.append("--track-name")
-                                remux.append("0:\"" + aacname.rstrip() + "\"")
-                               
+                                remux.append("0:\"" + dtsinfo[dtstrackid]['aacname'].rstrip() + "\"")
+
                             # Set track compression scheme and append new AAC
                             remux.append("--compression")
                             remux.append("0:" + comp)
-                            remux.append(tempaacfile)
-                       
-                        # Declare output file
-                        remux.append("-o")
-                        remux.append(tempnewmkvfile)
-                       
-                        runcommand(remuxtitle, remux)
+                            remux.append(dtsinfo[dtstrackid]['aacfile'])
 
-                        #time.sleep(600)
+                    # Declare output file
+                    remux.append("-o")
+                    remux.append(tempnewmkvfile)
 
-                        if not args.test:
-                            if args.mp4:
-                                converttitle = "  Converting MKV to MP4 [" + str(jobnum) + "/" + str(totaljobs) + "]..."
-                                convertcmd = [ffmpeg, "-i", tempnewmkvfile, "-map", "0", "-vcodec", "copy", "-acodec", "copy", "-c:s", "mov_text", mp4file]
-                                runcommand(converttitle, convertcmd)
-                                silentremove(ford)
-                            else:
-                                #~ replace old mkv with new mkv
-                                if args.new:
-                                    shutil.move(tempnewmkvfile, adjacentmkvfile)
-                                else:
-                                    silentremove(ford)
-                                    shutil.move(tempnewmkvfile, ford)
+                    runcommand(remuxtitle, remux)
 
                     if not args.test:
-                        #~ clean up temp folder
-                        if args.keepdts and not args.external:
-                            shutil.move(tempdtsfile, os.path.join(dirName, fileBaseName + ".dts"))
-                            fname = dtsfile
+                        if args.mp4:
+                            converttitle = "  Converting MKV to MP4 [" + str(jobnum) + "/" + str(totaljobs) + "]..."
+                            convertcmd = [ffmpeg, "-i", tempnewmkvfile, "-map", "0", "-vcodec", "copy", "-acodec", "copy", "-c:s", "mov_text", mp4file]
+                            runcommand(converttitle, convertcmd)
+                            silentremove(ford)
+                            silentremove(tempnewmkvfile)
+                            files.append(fileBaseName + '.mp4')
                         else:
-                            silentremove(tempdtsfile)
-                        if not args.external:
-                            silentremove(tempac3file)
-                            silentremove(tempaacfile)
-                            silentremove(temptcfile)
-                        if not os.listdir(tempdir):
-                            os.rmdir(tempdir)
+                            #~ replace old mkv with new mkv
+                            if args.new:
+                                shutil.move(tempnewmkvfile, adjacentmkvfile)
+                            else:
+                                silentremove(ford)
+                                shutil.move(tempnewmkvfile, ford)
+
+                #~ clean up temp folder
+                if not args.test:
+                    if args.keepdts and not args.external:
+                        if len(dtstracks) > 1:
+                            for dtstrackid in dtstracks:
+                                outputdtsfile = fileBaseName + '_' + dtstrackid + '.dts'
+                                shutil.move(dtsinfo[dtstrackid]['dtsfile'], os.path.join(dirName, outputdtsfile))
+                                files.append(outputdtsfile)
+                        else:
+                            outputdtsfile = fileBaseName + ".dts"
+                            shutil.move(tempdtsfile, os.path.join(dirName, outputdtsfile))
+                            files.append(outputdtsfile)
+                    for dtstrackid in dtstracks:
+                        silentremove(dtsinfo[dtstrackid]['dtsfile'])
+                        silentremove(dtsinfo[dtstrackid]['ac3file'])
+                        silentremove(dtsinfo[dtstrackid]['aacfile'])
+                        silentremove(dtsinfo[dtstrackid]['tcfile'])
+                    if not os.listdir(tempdir):
+                        os.rmdir(tempdir)
 
                 #~ print out time taken
                 elapsed = (time.time() - starttime)
@@ -869,55 +921,55 @@ def process(ford):
                 seconds = int(elapsed) % 60
                 doprint("  " + fileName + " finished in: " + str(minutes) + " minutes " + str(seconds) + " seconds\n", 1)
 
-            return fname
-            
+            return files
 
 totalstime = time.time()
 for a in args.fileordir:
     for ford in glob.glob(a):
-        fname = False
+        files = []
         if os.path.isdir(ford):
             for f in os.listdir(ford):
                 process(os.path.join(ford, f))
         else:
-            fname = process(ford)
+            files = process(ford)
         destdir = False
         if args.destdir:
             destdir = args.destdir
         if sab and args.sabdestdir:
             destdir = args.sabdestdir
         if destdir:
-            if fname:
-                (dirName, fileName) = os.path.split(ford)
-                destfile = os.path.join(destdir, fname)
-                origfile = os.path.join(dirName, fname)
-                if args.md5 and (find_mount_point(dirName) != find_mount_point(destdir)):
-                    if os.path.exists(destfile):
-                        if args.overwrite:
-                            silentremove(destfile)
+            if len(files):
+                for fname in files:
+                    (dirName, fileName) = os.path.split(ford)
+                    destfile = os.path.join(destdir, fname)
+                    origfile = os.path.join(dirName, fname)
+                    if args.md5 and (find_mount_point(dirName) != find_mount_point(destdir)):
+                        if os.path.exists(destfile):
+                            if args.overwrite:
+                                silentremove(destfile)
+                                shutil.copyfile(origfile, destfile)
+                                if getmd5(origfile) == getmd5(destfile):
+                                    silentremove(origfile)
+                                else:
+                                    print "MD5's don't match."
+                            else:
+                                print "File " + destfile + " already exists"
+                        else:
+                            doprint("copying: " + origfile + " --> " + destfile + "\n", 3)
                             shutil.copyfile(origfile, destfile)
                             if getmd5(origfile) == getmd5(destfile):
                                 silentremove(origfile)
                             else:
                                 print "MD5's don't match."
-                        else:
-                            print "File " + destfile + " already exists"
                     else:
-                        doprint("copying: " + origfile + " --> " + destfile + "\n", 3)
-                        shutil.copyfile(origfile, destfile)
-                        if getmd5(origfile) == getmd5(destfile):
-                            silentremove(origfile)
+                        if os.path.exists(destfile):
+                            if args.overwrite:
+                                silentremove(destfile)
+                                shutil.move(origfile, destfile)
+                            else:
+                                print "File " + destfile + " already exists"
                         else:
-                            print "MD5's don't match."
-                else:
-                    if os.path.exists(destfile):
-                        if args.overwrite:
-                            silentremove(destfile)
                             shutil.move(origfile, destfile)
-                        else:
-                            print "File " + destfile + " already exists"
-                    else:
-                        shutil.move(origfile, destfile)
             else:
                 origpath = os.path.abspath(ford)
                 destpath = os.path.join(destdir, os.path.basename(os.path.normpath(ford)))
@@ -938,7 +990,7 @@ for a in args.fileordir:
 if sab or nzbget:
     sys.stdout.write("mkv dts -> ac3 conversion: " + elapsedstr(totalstime))
 else:
-    doprint("Total Time: " + elapsedstr(totalstime), 1)
+    doprint("Total Time: " + elapsedstr(totalstime) + "\n", 1)
 
 if nzbget:
     sys.exit(POSTPROCESS_SUCCESS)
