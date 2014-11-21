@@ -51,7 +51,7 @@ usage: mkvdts2ac3.py [-h] [--aac] [--aacstereo] [--aaccustom TITLE] [-c TITLE]
                      [--mkvtoolnixpath DIRECTORY] [-n] [--new]
                      [--no-subtitles] [-o] [-r] [-s MODE]
                      [--sabdestdir DIRECTORY] [--stereo] [-t TRACKID]
-                     [-w FOLDER] [-v] [-V] [--test] [--debug]
+                     [--all-tracks] [-w FOLDER] [-v] [-V] [--test] [--debug]
                      FileOrDirectory [FileOrDirectory ...]
 
 convert matroska (.mkv) video files audio portion from dts to ac3
@@ -97,6 +97,7 @@ optional arguments:
   -t TRACKID, --track TRACKID
                         Specify alternate DTS track. If it is not a DTS track
                         it will default to the first DTS track found
+  --all-tracks          Convert all DTS tracks
   -w FOLDER, --wd FOLDER
                         Specify alternate temporary working directory
   -v, --verbose         Turn on verbose output. Use more v's for more

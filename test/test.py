@@ -93,6 +93,21 @@ f.write(subprocess.check_output(["mkvinfo", testfile]))
 f.close()
 print "DONE"
 
+# mp4
+test = "mp4"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "test.mkv")
+shutil.copyfile("test.mkv", testfile)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--mp4", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+print "DONE"
+
 # destdir
 test = "destdir"
 sys.stdout.write('Running test "' + test + '"...')
@@ -110,6 +125,125 @@ f.write(output)
 f.close()
 print "DONE"
 
+# destdir mp4
+test = "destdir_mp4"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "test.mkv")
+shutil.copyfile("test.mkv", testfile)
+destdir = os.path.join(testdir, "destdir")
+os.makedirs(destdir)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--destdir", destdir, "--mp4", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+print "DONE"
+
+# destdir keepdts
+test = "destdir_keepdts"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "test.mkv")
+shutil.copyfile("test.mkv", testfile)
+destdir = os.path.join(testdir, "destdir")
+os.makedirs(destdir)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--destdir", destdir, "--keepdts", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+print "DONE"
+
+# destdir keepdts all-tracks
+test = "destdir_keepdts_all-tracks"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "multidts.mkv")
+shutil.copyfile("multidts.mkv", testfile)
+destdir = os.path.join(testdir, "destdir")
+os.makedirs(destdir)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--destdir", destdir, "--keepdts", "--all-tracks", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+print "DONE"
+
+# destdir external
+test = "destdir_external"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "test.mkv")
+shutil.copyfile("test.mkv", testfile)
+destdir = os.path.join(testdir, "destdir")
+os.makedirs(destdir)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--destdir", destdir, "--external", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+print "DONE"
+
+# destdir external all-tracks
+test = "destdir_external_all-tracks"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "multidts.mkv")
+shutil.copyfile("multidts.mkv", testfile)
+destdir = os.path.join(testdir, "destdir")
+os.makedirs(destdir)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--destdir", destdir, "--external", "--all-tracks", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+print "DONE"
+
+# destdir external aac
+test = "destdir_external_aac"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "test.mkv")
+shutil.copyfile("test.mkv", testfile)
+destdir = os.path.join(testdir, "destdir")
+os.makedirs(destdir)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--destdir", destdir, "--external", "--aac", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+print "DONE"
+
+# destdir external aac all-tracks
+test = "destdir_external_aac_all-tracks"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "multidts.mkv")
+shutil.copyfile("multidts.mkv", testfile)
+destdir = os.path.join(testdir, "destdir")
+os.makedirs(destdir)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--destdir", destdir, "--external", "--aac", "--all-tracks", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+print "DONE"
+
 # external
 test = "external"
 sys.stdout.write('Running test "' + test + '"...')
@@ -118,6 +252,21 @@ os.makedirs(testdir)
 testfile = os.path.join(testdir, "test.mkv")
 shutil.copyfile("test.mkv", testfile)
 cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--external", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+print "DONE"
+
+# external all-tracks
+test = "external_all-tracks"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "multidts.mkv")
+shutil.copyfile("multidts.mkv", testfile)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--external", "--all-tracks", testfile]
 output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
 outfile = os.path.join(testdir, "output.txt")
 f = open(outfile, "w")
@@ -179,6 +328,25 @@ f.write(subprocess.check_output(["mkvinfo", testfile]))
 f.close()
 print "DONE"
 
+# keepdts all-tracks
+test = "keepdts_all-tracks"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "multidts.mkv")
+shutil.copyfile("multidts.mkv", testfile)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--keepdts", "--all-tracks", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+mkvinfo = os.path.join(testdir, "mkvinfo.txt")
+f = open(mkvinfo, "w")
+f.write(subprocess.check_output(["mkvinfo", testfile]))
+f.close()
+print "DONE"
+
 if extdir:
     # md5
     test = "md5"
@@ -198,7 +366,7 @@ if extdir:
     print "DONE"
     
     # md5 tree
-    test = "md5 tree"
+    test = "md5_tree"
     sys.stdout.write('Running test "' + test + '"...')
     testdir = os.path.join("tests", test)
     os.makedirs(testdir)
@@ -252,8 +420,27 @@ f.write(subprocess.check_output(["mkvinfo", testfile]))
 f.close()
 print "DONE"
 
+# nodts all-tracks
+test = "nodts_all-tracks"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "multidts.mkv")
+shutil.copyfile("multidts.mkv", testfile)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--nodts", "--all-tracks", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+mkvinfo = os.path.join(testdir, "mkvinfo.txt")
+f = open(mkvinfo, "w")
+f.write(subprocess.check_output(["mkvinfo", testfile]))
+f.close()
+print "DONE"
+
 # not recursive
-test = "not recursive"
+test = "not_recursive"
 sys.stdout.write('Running test "' + test + '"...')
 testdir = os.path.join("tests", test)
 os.makedirs(testdir)
@@ -311,7 +498,7 @@ print "DONE"
 
 if extdir:
     # recursive md5 tree
-    test = "recursive md5 tree"
+    test = "recursive_md5_tree"
     sys.stdout.write('Running test "' + test + '"...')
     testdir = os.path.join("tests", test)
     os.makedirs(testdir)
