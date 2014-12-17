@@ -886,7 +886,8 @@ def process(ford):
                             converttitle = "  Converting MKV to MP4 [" + str(jobnum) + "/" + str(totaljobs) + "]..."
                             convertcmd = [ffmpeg, "-i", tempnewmkvfile, "-map", "0", "-vcodec", "copy", "-acodec", "copy", "-c:s", "mov_text", mp4file]
                             runcommand(converttitle, convertcmd)
-                            silentremove(ford)
+                            if not args.new:
+                                silentremove(ford)
                             silentremove(tempnewmkvfile)
                             files.append(fileBaseName + '.mp4')
                         else:
