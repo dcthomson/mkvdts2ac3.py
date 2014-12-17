@@ -18,6 +18,8 @@
 ##############################################################################
 ### NZBGET POST-PROCESSING SCRIPT                                          ###
 
+# Convert the DTS audio in MKV files to AC3.
+#
 # mkvdts2ac3.py is a python script for linux, windows or os x which can be used
 # for converting the DTS in Matroska (MKV) files to AC3. It provides you with a
 # set of options for controlling the resulting file.
@@ -78,7 +80,7 @@
 # Specify alternate DTS track. If it is not a DTS track it will default to the first DTS track found
 #track=
 
-# Process all the DTS tracks.
+# Process all the DTS tracks (True, False).
 #all_tracks=False
 
 # Specify alternate temporary working directory
