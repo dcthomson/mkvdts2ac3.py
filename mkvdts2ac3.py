@@ -50,9 +50,6 @@
 # Force processing when AC3 track is detected (True, False).
 #force=False
 
-# New AC3 track will be first in the file (True, False).
-#initial=False
-
 # Keep external DTS track (implies '-n') (True, False).
 #keepdts=False
 
@@ -73,6 +70,9 @@
 
 # Overwrite file if already there (True, False).
 #overwrite=False
+
+# Position of AC3 track in file (initial = First track in file, last = Last track in file, afterdts = After the DTS track)
+#position=last
 
 # Make ac3 track stereo instead of 6 channel (True, False).
 #stereo=False
@@ -227,12 +227,7 @@ if os.environ.has_key('NZBOP_SCRIPTDIR') and not os.environ['NZBOP_VERSION'][0:5
         args.force = False
     else:
         args.force = True
-    
-    if os.environ['NZBPO_INITIAL'] == 'False':
-        args.initial = False
-    else:
-        args.initial = True
-        
+
     if os.environ['NZBPO_KEEPDTS'] == 'False':
         args.keepdts = False
     else:
@@ -264,6 +259,8 @@ if os.environ.has_key('NZBOP_SCRIPTDIR') and not os.environ['NZBOP_VERSION'][0:5
         args.overwrite = False
     else:
         args.overwrite = True
+
+    args.position = os.environ['NZBPO_POSITION']
 
     args.sabdestdir = 'sab'
     
@@ -327,7 +324,6 @@ else:
                         help="Leave AC3 track out of file. Does not modify the original matroska file. This overrides '-n' and '-d' arguments")
     parser.add_argument("-f", "--force", help="Force processing when AC3 track is detected", action="store_true")
     parser.add_argument("--ffmpegpath", metavar="DIRECTORY", help="Path of ffmpeg")
-    parser.add_argument("-i", "--initial", help="New AC3 track will be first in the file", action="store_true")
     parser.add_argument("-k", "--keepdts", help="Keep external DTS track (implies '-n')", action="store_true")
     parser.add_argument("--md5", help="check md5 of files before removing the original if destination directory is on a different device than the original file", action="store_true")
     parser.add_argument("--mp4", help="create output in mp4 format", action="store_true")
@@ -336,6 +332,7 @@ else:
     parser.add_argument("--new", help="Do not copy over original. Create new adjacent file", action="store_true")
     parser.add_argument("--no-subtitles", help="Remove subtitles", action="store_true")
     parser.add_argument("-o", "--overwrite", help="Overwrite file if already there. This only applies if destdir or sabdestdir is set", action="store_true")
+    parser.add_argument("-p", "--position", choices=['initial', 'last', 'afterdts'], default="last", help="Set position of AC3 track. 'initial' = First track in file, 'last' = Last track in file, 'afterdts' = After the DTS track [default: last]")
     parser.add_argument("-r", "--recursive", help="Recursively descend into directories", action="store_true")
     parser.add_argument("-s", "--compress", metavar="MODE", help="Apply header compression to streams (See mkvmerge's --compression)", default='none')
     parser.add_argument("--sabdestdir", metavar="DIRECTORY", help="SABnzbd Destination Directory")
@@ -809,15 +806,34 @@ def process(ford):
                     if args.no_subtitles:
                         remux.append("--no-subtitles")
 
-                    # Change the default position of the AC3 track if requested
-                    if args.initial:
+                    # Change the default position of the tracks if requested
+                    if args.position != 'last':
                         remux.append("--track-order")
                         tracklist = []
-                        totaltracks = len(dtstracks)
-                        if args.aac:
-                            totaltracks *= 2
-                        for trackid in range(1, int(totaltracks) + 1):
-                            tracklist.append('%d:0' % trackid)
+                        if args.position == "initial":
+                            totaltracks = len(dtstracks)
+                            if args.aac:
+                                totaltracks *= 2
+                            for trackid in range(1, int(totaltracks) + 1):
+                                tracklist.append('%d:0' % trackid)
+                        elif args.position == "afterdts":
+                            currenttrack = 0
+                            for dtstrackid in dtstracks:
+                                # Tracks up to the DTS track
+                                for trackid in range(currenttrack, int(dtstrackid)):
+                                    tracklist.append('0:%d' % trackid)
+                                # DTS track
+                                if not (args.nodts or args.keepdts):
+                                    tracklist.append('0:%d' % int(dtstrackid))
+                                # AC3 track
+                                tracklist.append('1:0')
+                                # AAC track
+                                if args.aac:
+                                    tracklist.append('2:0')
+                                currenttrack = int(dtstrackid) + 1
+                            # The remaining tracks
+                            for trackid in range(currenttrack, len(audiotracks)):
+                                tracklist.append('0:%d' % trackid)
                         remux.append(','.join(tracklist))
 
                     # If user doesn't want the original DTS track drop it
