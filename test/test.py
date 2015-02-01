@@ -290,14 +290,14 @@ f.write(output + "\n-------------\n" + output2)
 f.close()
 print "DONE"
 
-# initial
-test = "initial"
+# position initial
+test = "position_initial"
 sys.stdout.write('Running test "' + test + '"...')
 testdir = os.path.join("tests", test)
 os.makedirs(testdir)
 testfile = os.path.join(testdir, "test.mkv")
 shutil.copyfile("test.mkv", testfile)
-cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--initial", testfile]
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--position", "initial", testfile]
 output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
 outfile = os.path.join(testdir, "output.txt")
 f = open(outfile, "w")
@@ -307,6 +307,120 @@ mkvinfo = os.path.join(testdir, "mkvinfo.txt")
 f = open(mkvinfo, "w")
 f.write(subprocess.check_output(["mkvinfo", testfile]))
 f.close()
+print "DONE"
+
+# position initial all-tracks
+test = "position_initial_all-tracks"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "multidts.mkv")
+shutil.copyfile("multidts.mkv", testfile)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--position", "initial", "--all-tracks", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+mkvinfo = os.path.join(testdir, "mkvinfo.txt")
+f = open(mkvinfo, "w")
+f.write(subprocess.check_output(["mkvinfo", testfile]))
+f.close()
+print "DONE"
+
+# position initial all-tracks aac
+test = "position_initial_all-tracks_aac"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "multidts.mkv")
+shutil.copyfile("multidts.mkv", testfile)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--position", "initial", "--all-tracks", "--aac", testfile]
+output = subprocess.check_output(cmdlist,  stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+mkvinfo = os.path.join(testdir, "mkvinfo.txt")
+f = open(mkvinfo, "w")
+f.write(subprocess.check_output(["mkvinfo", testfile]))
+f.close()
+print "DONE"
+
+# position afterdts
+test = "position_afterdts"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "test.mkv")
+shutil.copyfile("test.mkv", testfile)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--position", "afterdts", testfile]
+outout = subprocess.check_output(cmdlist, stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+mkvinfo = os.path.join(testdir, "mkvinfo.txt")
+f = open(mkvinfo, "w")
+f.write(subprocess.check_output(["mkvinfo", testfile]))
+f.close();
+print "DONE"
+
+# position afterdts all-tracks
+test = "position_afterdts_all-tracks"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "multidts.mkv")
+shutil.copyfile("multidts.mkv", testfile)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--position", "afterdts", "--all-tracks", testfile]
+outout = subprocess.check_output(cmdlist, stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+mkvinfo = os.path.join(testdir, "mkvinfo.txt")
+f = open(mkvinfo, "w")
+f.write(subprocess.check_output(["mkvinfo", testfile]))
+f.close();
+print "DONE"
+
+# position afterdts all-tracks aac
+test = "position_afterdts_all-tracks_aac"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "multidts.mkv")
+shutil.copyfile("multidts.mkv", testfile)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--position", "afterdts", "--all-tracks", "--aac", testfile]
+outout = subprocess.check_output(cmdlist, stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+mkvinfo = os.path.join(testdir, "mkvinfo.txt")
+f = open(mkvinfo, "w")
+f.write(subprocess.check_output(["mkvinfo", testfile]))
+f.close();
+print "DONE"
+
+# position afterdts all-tracks nodts
+test = "position_afterdts_all-tracks_nodts"
+sys.stdout.write('Running test "' + test + '"...')
+testdir = os.path.join("tests", test)
+os.makedirs(testdir)
+testfile = os.path.join(testdir, "multidts.mkv")
+shutil.copyfile("multidts.mkv", testfile)
+cmdlist = ["python", mkvdts2ac3cmd, "-vvv", "--position", "afterdts", "--all-tracks", "--nodts", testfile]
+outout = subprocess.check_output(cmdlist, stderr=subprocess.STDOUT)
+outfile = os.path.join(testdir, "output.txt")
+f = open(outfile, "w")
+f.write(output)
+f.close()
+mkvinfo = os.path.join(testdir, "mkvinfo.txt")
+f = open(mkvinfo, "w")
+f.write(subprocess.check_output(["mkvinfo", testfile]))
+f.close();
 print "DONE"
 
 # keepdts
